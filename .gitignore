@@ -1,4 +1,6 @@
 *.byte
+*.llvm
+*.exe
 *.out
 
 _build
