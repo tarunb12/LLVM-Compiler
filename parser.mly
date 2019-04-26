@@ -3,22 +3,33 @@
     open Ast
 %}
 
-%token <string> ID
-%token <float> FLOAT
-%token <int> INT
-%token ASSIGN LT LTE GT GTE EQ NEQ
-%token LPAR RPAR LBRACE RBRACE COMMA DOT
+%token TYPE_INT TYPE_FLOAT TYPE_BOOL TYPE_CHAR TYPE_STRING TYPE_UNIT
+%token ASSIGN LT LTE GT GTE EQ NEQ TRUE FALSE
+%token LPAR RPAR LBRACE RBRACE COMMA SEMI
 %token PLUS MINUS MUL DIV AND OR NOT
-%token IF ELSE FOR WHILE
-%token TYPE_INT TYPE_FLOAT TYPE_BOOL
+%token IF ELSE FOR WHILE BREAK CONTINUE RETURN
 %token EOF
+
+%token <int> INT
+%token <float> FLOAT
+%token <char> CHAR
+%token <string> STRING
+%token <string> ID
+
+%nonassoc NOELSE
+%nonassoc ELSE
+%right ASSIGN
+%left AND OR
+%left EQ NEQ
+%left LT GT LTE GTE
 %left PLUS MINUS
 %left MUL DIV
-%type <expr> main
-%start main
+
+%type <Ast.program> program
+%start program
 %%
 
-main:
+program:
     | stmts EOF                         { Program($1) }
     ;
 
@@ -37,9 +48,22 @@ block:
     ;
 
 stmt:
-    | var_definition
-    | func_definition
     | expr                              { Expr($1) }
+    | RETURN                            { Return(Noexpr) }
+    | RETURN expr                       { Return($2) }
+    | LBRACE stmts RBRACE               { Block($2) }
+    | IF LPAR expr RPAR stmt ELSE stmt  { If($3, $5, $7) }
+    | WHILE LPAR expr RPAR stmt         { While($3, $5) }
+    | var_definition                    { $1 }
+    | func_definition                   { $1 }
+    | FOR LPAR opt_expr SEMI expr SEMI opt_expr RPAR stmt
+        { For($3, $5, $7, $9) }
+    | BREAK                             { Break }
+    | CONTINUE                          { Continue }
+    ;
+
+opt_expr:                               { Noexpr }
+    | expr                              { $1 }
     ;
 
 var_declaration:
@@ -61,30 +85,38 @@ func_declaration_args:
         { rev ($3 :: $1) }
     ;
 
-number:
-    | INT                               { Int($1) }
-    | FLOAT                             { Float($1) }
-    ;
-
 expr:
-    | expr PLUS expr                    { BinOp(Add, $1, $3) }
-    | expr MINUS expr                   { BinOp(Sub, $1, $3) }
-    | expr MUL expr                     { BinOp(Mult, $1, $3) }
-    | expr DIV expr                     { BinOp(Div, $1, $3) }
-    | expr EQ expr                      { BinOp(Eq, $1, $3) }
-    | expr NEQ expr                     { BinOp(NEq, $1, $3) }
-    | expr LT expr                      { BinOp(Less, $1, $3) }
-    | expr LTE expr                     { BinOp(LessEq, $1, $3) }
-    | expr GT expr                      { BinOp(Greater, $1, $3) }
-    | expr GTE expr                     { BinOp(GreaterEq, $1, $3) }
+    | atom                              { $1 }
+    | expr PLUS     expr                { BinOp(Add, $1, $3) }
+    | expr MINUS    expr                { BinOp(Sub, $1, $3) }
+    | expr MUL      expr                { BinOp(Mult, $1, $3) }
+    | expr DIV      expr                { BinOp(Div, $1, $3) }
+    | expr EQ       expr                { BinOp(Eq, $1, $3) }
+    | expr NEQ      expr                { BinOp(NEq, $1, $3) }
+    | expr LT       expr                { BinOp(Less, $1, $3) }
+    | expr LTE      expr                { BinOp(LessEq, $1, $3) }
+    | expr GT       expr                { BinOp(Greater, $1, $3) }
+    | expr GTE      expr                { BinOp(GreaterEq, $1, $3) }
     | NOT expr                          { UnOp(Not, $1) }
-    | expr AND expr                     { BinOp(And, $1, $3) }
-    | expr OR expr                      { BinOp(Or, $1, $3) }
-    | LPAR expr RPAR                    { $2 }
+    | expr AND      expr                { BinOp(And, $1, $3) }
+    | expr OR       expr                { BinOp(Or, $1, $3) }
+    | LPAR  expr RPAR                   { $2 }
     ;
 
 exprType:
-    | TYPE_INT                          { INT }
-    | TYPE_FLOAT                        { FLOAT }
-    | TYPE_BOOL                         { BOOL }
+    | TYPE_INT                          { Int_t }
+    | TYPE_FLOAT                        { Float_t }
+    | TYPE_BOOL                         { Bool_t }
+    | TYPE_CHAR                         { Char_t }
+    | TYPE_STRING                       { String_t }
+    | TYPE_UNIT                         { Unit_t }
     ;
+
+atom:
+    | TRUE                              { Bool(true) }
+    | FALSE                             { Bool(false) }
+    | INT                               { Int($1) }
+    | FLOAT                             { Float($1) }
+    | CHAR                              { Char($1) }
+    | STRING                            { String($1) }                    
+    ;    
