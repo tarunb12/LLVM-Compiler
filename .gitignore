@@ -1,6 +1,8 @@
 *.byte
+*.out
+
 _build
 _tags
-.merlin
 
+.merlin
 .DS_Store
