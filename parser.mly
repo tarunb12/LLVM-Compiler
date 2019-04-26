@@ -16,7 +16,7 @@
 %%
 
 program:
-    | stmts                           { $1 }
+    | stmts                         { $1 }
     ;
 
 stmts:
@@ -31,6 +31,36 @@ stmt_list:
 block:
     | LBRAC stmts RBRAC             { $2 }
     | LBRAC RBRAC                   {  }
+    ;
+
+stmt:
+    | var_declaration
+    | func_declaration
+    | expr                          {  }
+    ;
+
+var_declaration:
+    | 
+    ;
+
+func_declaration:
+    |
+    ;
+
+number:
+    | INT                           { Int($1) }
+    | FLOAT                         { Float($1) }
+    ;
+
+comparison:
+    | EQ | NEQ | LTE | GTE | LT
+    | GT | PLUS | MINUS | MUL | DIV
+    ;
+
+expr:
+    | number
+    | expr comparison expr          { BinOp($2) }
+    | LPAR expr RPAR                { $2 }
     ;
 
 (* v_expr:
