@@ -1,7 +1,12 @@
 # LLVM Compiler in OCaml
 
-## Compiling & Running Tests
+## Compiling and Running Tests
 ```console
 $ make
 ```
-Output files will be /tests/*.out
+
+### Package Versions
+| Package | Version  |
+|---------|:--------:|
+| LLVM    | 8.0.0    |
+| menhir  | 20181113 |

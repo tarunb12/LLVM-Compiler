@@ -20,8 +20,9 @@ type expr =
     | Char      of char
     | String    of string
     | Id        of string
-    | UnOp      of unOp * expr
     | BinOp     of binOp * expr * expr
+    | UnOp      of unOp * expr
+    | Call      of string * expr list
     | Noexpr
 
 type statement =

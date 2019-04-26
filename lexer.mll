@@ -19,7 +19,7 @@
   \x27 - single quote
  *)
 
-let ws = ['\x20' '\n' '\t']
+let ws = ['\x20' '\t']
 let digit = ['0'-'9']
 let alph = ['a'-'z' 'A'-'Z']
 let ascii = [' '-'!' '#'-'[' ']'-'~']
@@ -33,6 +33,7 @@ let id = (alph | '_')(alph | digit | '_')* as lxm
 
 rule token = parse
   | ws                  { token lexbuf }
+  | '\n'                { next_line lexbuf; token lexbuf }
   | "//"                { single_comment lexbuf }
   | '('                 { LPAR }
   | ')'                 { RPAR }
@@ -40,12 +41,14 @@ rule token = parse
   | '}'                 { RBRACE }
   | ','                 { COMMA }
   | ';'                 { SEMI }
+  | '='                 { ASSIGN }
+
   (* Math Operators *)
   | '+'                 { PLUS }
   | '-'                 { MINUS }
   | '*'                 { MUL }
   | '/'                 { DIV }
-  | '='                 { ASSIGN }
+  
   (* Bool Operators *)
   | "=="                { EQ }
   | "!="                { NEQ }
@@ -56,6 +59,7 @@ rule token = parse
   | '!'                 { NOT }
   | "&&"                { AND }
   | "||"                { OR }
+
   (* Conditionals *)
   | "if"                { IF }
   | "else"              { ELSE }
@@ -64,6 +68,7 @@ rule token = parse
   | "break"             { BREAK }
   | "continue"          { CONTINUE }
   | "return"            { RETURN }
+
   (* Types *)
   | "int"               { TYPE_INT }
   | "float"             { TYPE_FLOAT }
@@ -71,11 +76,16 @@ rule token = parse
   | "char"              { TYPE_CHAR }
   | "string"            { TYPE_STRING }
   | "unit"              { TYPE_UNIT }
+
+  (* Functions *)
+  | "print"             { PRINT }
+
   (* Atoms *)
   | int                 { INT (int_of_string lxm) }
   | float               { FLOAT (float_of_string lxm) }
   | char                { CHAR (lxm) }
   | id                  { ID (lxm) }
+
   | eof                 { EOF }
   | _                   { raise (SyntaxError ("Unexpected char: " ^ lexeme lexbuf)) }
 

@@ -18,12 +18,12 @@
 
 %nonassoc NOELSE
 %nonassoc ELSE
-%right ASSIGN
 %left AND OR
 %left EQ NEQ
 %left LT GT LTE GTE
 %left PLUS MINUS
 %left MUL DIV
+%right NOT
 
 %type <Ast.program> program
 %start program
@@ -109,6 +109,7 @@ expr:
     | NOT expr                                  { UnOp(Not, $2) }
     | expr AND      expr                        { BinOp(And, $1, $3) }
     | expr OR       expr                        { BinOp(Or, $1, $3) }
+    | ID LPAR call_args RPAR                    { Call($1, $3) }
     | LPAR  expr RPAR                           { $2 }
     ;
 

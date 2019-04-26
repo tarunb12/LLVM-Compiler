@@ -8,6 +8,7 @@ clean:
 	rm -fr _build/
 	rm -rf tests/*.out
 
+
 main.byte:
 	ocamlbuild -use-menhir main.byte
 
@@ -16,3 +17,5 @@ tests/%.out: tests/%.in main.byte
 
 tests: main.byte $(OUT_FILES)
 	@echo "Done testing. Results in tests dir."
+
+retest: clean tests
