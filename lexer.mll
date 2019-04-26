@@ -1,5 +1,6 @@
 {
   open Parser
+  open Lexing
 
   exception SyntaxError of string
 
@@ -37,7 +38,6 @@ rule token = parse
   | ')'                 { RPAR }
   | '{'                 { LBRACE }
   | '}'                 { RBRACE }
-  | '.'                 { DOT }
   | ','                 { COMMA }
   | ';'                 { SEMI }
   (* Math Operators *)

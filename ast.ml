@@ -1,7 +1,7 @@
 type binOp = 
     | Add | Sub | Mult | Div | And
-    | Or | Equal | Neq | Less | Leq
-    | Greater | Geq
+    | Or | Eq | NEq | Less | LEq
+    | Greater | GEq
     ;;
 
 type unOp =
@@ -14,19 +14,22 @@ type datatype =
     ;;
 
 type expr =
-    | Int   of int
-    | Float of float
-    | Bool  of bool
-    | Id    of string
-    | UnOp  of unOp
-    | BinOp of binOp * expr * expr
+    | Int       of int
+    | Float     of float
+    | Bool      of bool
+    | Char      of char
+    | String    of string
+    | Id        of string
+    | UnOp      of unOp * expr
+    | BinOp     of binOp * expr * expr
     | Noexpr
 
-and statement =
+type statement =
     | Block     of statement list
     | Expr      of expr
     | Return    of expr
     | VarDef    of datatype * string * expr
+    | FuncDef   of datatype * string * statement list * statement list
     | VarDec    of datatype * string
     | If        of expr * statement * statement
     | For       of expr * expr * expr * statement
