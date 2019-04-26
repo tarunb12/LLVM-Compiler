@@ -1,82 +1,90 @@
 %{
     open List
-    open Expr
+    open Ast
 %}
 
 %token <string> ID
 %token <float> FLOAT
 %token <int> INT
-%token PLUS MINUS MUL DIV
-%token LPAR RPAR LBRAC RBRAC COMMA DOT
-%token EOL
+%token ASSIGN LT LTE GT GTE EQ NEQ
+%token LPAR RPAR LBRACE RBRACE COMMA DOT
+%token PLUS MINUS MUL DIV AND OR NOT
+%token IF ELSE FOR WHILE
+%token TYPE_INT TYPE_FLOAT TYPE_BOOL
+%token EOF
 %left PLUS MINUS
 %left MUL DIV
 %type <expr> main
-%start program
+%start main
 %%
 
-program:
-    | stmts                         { $1 }
+main:
+    | stmts EOF                         { Program($1) }
     ;
 
 stmts:
-    | stmt_list                     { rev $1 }
+    | stmt_list                         { rev $1 }
     ;
 
 stmt_list:
-    | stmt                          { [$1] }
-    | stmt_list stmt                { $2 :: $1 }
+    | stmt                              { [$1] }
+    | stmt_list stmt                    { $2 :: $1 }
     ;
 
 block:
-    | LBRAC stmts RBRAC             { $2 }
-    | LBRAC RBRAC                   {  }
+    | LBRACE stmts RBRACE               { $2 }
+    | LBRACE RBRACE                     {  }
     ;
 
 stmt:
-    | var_declaration
-    | func_declaration
-    | expr                          {  }
+    | var_definition
+    | func_definition
+    | expr                              { Expr($1) }
     ;
 
 var_declaration:
-    | 
+    | exprType ID                       { VarDec($1, $2) }
     ;
 
-func_declaration:
-    |
+var_definition:
+    | exprType ID ASSIGN expr           { VarDef($1, $2, $4) }
+    ;
+
+func_definition:
+    | exprType ID LPAR func_declaration_args RPAR block
+        { FuncDef($1, $2, $4, $6) }
+    ;
+
+func_declaration_args:
+    | var_declaration                   { [$1] }
+    | func_declaration_args COMMA var_declaration
+        { rev ($3 :: $1) }
     ;
 
 number:
-    | INT                           { Int($1) }
-    | FLOAT                         { Float($1) }
-    ;
-
-comparison:
-    | EQ | NEQ | LTE | GTE | LT
-    | GT | PLUS | MINUS | MUL | DIV
+    | INT                               { Int($1) }
+    | FLOAT                             { Float($1) }
     ;
 
 expr:
-    | number
-    | expr comparison expr          { BinOp($2) }
-    | LPAR expr RPAR                { $2 }
+    | expr PLUS expr                    { BinOp(Add, $1, $3) }
+    | expr MINUS expr                   { BinOp(Sub, $1, $3) }
+    | expr MUL expr                     { BinOp(Mult, $1, $3) }
+    | expr DIV expr                     { BinOp(Div, $1, $3) }
+    | expr EQ expr                      { BinOp(Eq, $1, $3) }
+    | expr NEQ expr                     { BinOp(NEq, $1, $3) }
+    | expr LT expr                      { BinOp(Less, $1, $3) }
+    | expr LTE expr                     { BinOp(LessEq, $1, $3) }
+    | expr GT expr                      { BinOp(Greater, $1, $3) }
+    | expr GTE expr                     { BinOp(GreaterEq, $1, $3) }
+    | NOT expr                          { UnOp(Not, $1) }
+    | expr AND expr                     { BinOp(And, $1, $3) }
+    | expr OR expr                      { BinOp(Or, $1, $3) }
+    | LPAR expr RPAR                    { $2 }
     ;
 
-(* v_expr:
-    |   NUM                         { Num($1) }
-    |   VAR                         { Var($1) }
-    |   NUM VAR                     { Mul(Num($1), Var($2)) }
-    |   VAR POW NUM                 { Pow(Var($1), $3) }
-    |   NUM VAR POW NUM             { Mul(Num($1), Pow(Var($2), $4))}
-
-expr:
-    |   v_expr                      { $1 }
-    |   LPAR expr RPAR              { $2 }
-    |   expr TIMES expr             { Mul($1,$3) }
-    |   expr PLUS expr              { Add($1, $3) }
-    |   expr MINUS expr             { Sub($1, $3) }
-    |   expr POW NUM                { Pow($1, $3) }
-    |   PLUS expr                   { Pos($2) }
-    |   MINUS expr                  { Neg($2) }
-    ; *)
+exprType:
+    | TYPE_INT                          { INT }
+    | TYPE_FLOAT                        { FLOAT }
+    | TYPE_BOOL                         { BOOL }
+    ;
