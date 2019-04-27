@@ -14,15 +14,24 @@ let str_t       : Llvm.lltype     = Llvm.pointer_type (Llvm.i8_type context) ;;
 let named_values      : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 let named_parameters  : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 
-let rec codegen_expr : Llvm.llvalue = function
+let rec codegen_expr (llbuilder : Llvm.llbuilder) : Llvm.llvalue = function
   | FloatLit flt    -> Llvm.const_float float_t flt
   | IntLit int      -> Llvm.const_int i32_t int
   | BoolLit bool    -> if bool then Llvm.const_int i1_t 1 else Llvm.const_int i1_t 0
   | CharLit char    -> Llvm.const_int i8_t (int_of_char char)
-  | _               -> Llvm.const_float float_t 0
+  | _               -> raise NotImplemented
 
 and handle_binop (expr1 : expr) (expr2 : expr) (op : binOp) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
-  let expr1_t : datatype = match expr1 with
+  let getExprType (expr : expr) : datatype = match expr with
     | IntLit int -> Int_t
     | FloatLit float -> Float_t
-    | _ -> raise (Inva)
+    | _ -> raise InvalidType in
+
+  let expr1_t = getExprType expr1 in
+  let expr2_t = getExprType expr2 in
+
+  let expr1 = 
+  ;;
+
+let codegen_ast =
+  
