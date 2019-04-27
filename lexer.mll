@@ -77,7 +77,7 @@ rule token = parse
   | "string"            { TYPE_STRING }
   | "unit"              { TYPE_UNIT }
 
-  (* Functions *)
+  (* Built-in Functions *)
   | "print"             { PRINT }
 
   (* Atoms *)

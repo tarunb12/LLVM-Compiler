@@ -10,7 +10,7 @@ clean:
 
 
 main.byte:
-	ocamlbuild -use-menhir main.byte
+	ocamlbuild -use-ocamlfind -use-menhir main.byte -package llvm
 
 tests/%.out: tests/%.in main.byte
 	./main.byte $< > $@

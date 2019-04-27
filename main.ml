@@ -9,3 +9,4 @@ let () = open_in filename
 	|> from_channel
 	|> program token
 	|> execute
+	;;

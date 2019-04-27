@@ -8,6 +8,7 @@
 %token LPAR RPAR LBRACE RBRACE COMMA SEMI
 %token PLUS MINUS MUL DIV AND OR NOT
 %token IF ELSE FOR WHILE BREAK CONTINUE RETURN
+%token PRINT
 %token EOF
 
 %token <int> INT
@@ -49,6 +50,7 @@ block:
 
 stmt:
     | expr                                      { Expr($1) }
+    | PRINT expr                                { Print($2) }
     | RETURN                                    { Return(Noexpr) }
     | RETURN expr                               { Return($2) }
     | LBRACE stmts RBRACE                       { Block($2) }
