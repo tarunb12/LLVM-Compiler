@@ -1,8 +1,7 @@
 {
   open Parser
   open Lexing
-
-  exception SyntaxError of string
+  open Exceptions
 
   let next_line lexbuf =
     let pos = lexbuf.lex_curr_p in

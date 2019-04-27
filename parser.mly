@@ -50,7 +50,7 @@ block:
 
 stmt:
     | expr                                      { Expr($1) }
-    | PRINT expr                                { Print($2) }
+    | PRINT LPAR expr RPAR                      { Print($3) }
     | RETURN                                    { Return(Noexpr) }
     | RETURN expr                               { Return($2) }
     | LBRACE stmts RBRACE                       { Block($2) }
@@ -125,10 +125,10 @@ exprType:
     ;
 
 atom:
-    | TRUE                                      { Bool(true) }
-    | FALSE                                     { Bool(false) }
-    | INT                                       { Int($1) }
-    | FLOAT                                     { Float($1) }
-    | CHAR                                      { Char($1) }
-    | STRING                                    { String($1) }                    
+    | TRUE                                      { BoolLit(true) }
+    | FALSE                                     { BoolLit(false) }
+    | INT                                       { IntLit($1) }
+    | FLOAT                                     { FloatLit($1) }
+    | CHAR                                      { CharLit($1) }
+    | STRING                                    { StringLit($1) }                    
     ;    

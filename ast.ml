@@ -14,16 +14,17 @@ type datatype =
     ;;
 
 type expr =
-    | Int       of int
-    | Float     of float
-    | Bool      of bool
-    | Char      of char
-    | String    of string
+    | IntLit    of int
+    | FloatLit  of float
+    | BoolLit   of bool
+    | CharLit   of char
+    | StringLit of string
     | Id        of string
     | BinOp     of binOp * expr * expr
     | UnOp      of unOp * expr
     | Call      of string * expr list
     | Noexpr
+    ;;
 
 type statement =
     | Block     of statement list
