@@ -5,7 +5,7 @@ type binOp =
     ;;
 
 type unOp =
-    | Not
+    | Not | Neg
     ;;
 
 type datatype =
@@ -29,7 +29,6 @@ type expr =
 type statement =
     | Block     of statement list
     | Expr      of expr
-    | Print     of expr
     | Return    of expr
     | VarDef    of datatype * string * expr
     | FuncDef   of datatype * string * statement list * statement list

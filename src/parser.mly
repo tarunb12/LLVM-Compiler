@@ -8,7 +8,6 @@
 %token LPAR RPAR LBRACE RBRACE COMMA SEMI
 %token PLUS MINUS MUL DIV AND OR NOT
 %token IF ELSE FOR WHILE BREAK CONTINUE RETURN
-%token PRINT
 %token EOF
 
 %token <int> INT
@@ -24,7 +23,7 @@
 %left LT GT LTE GTE
 %left PLUS MINUS
 %left MUL DIV
-%right NOT
+%right NOT NEG
 
 %type <Ast.program> program
 %start program
@@ -50,7 +49,6 @@ block:
 
 stmt:
     | expr                                      { Expr($1) }
-    | PRINT LPAR expr RPAR                      { Print($3) }
     | RETURN                                    { Return(Noexpr) }
     | RETURN expr                               { Return($2) }
     | LBRACE stmts RBRACE                       { Block($2) }
@@ -108,11 +106,12 @@ expr:
     | expr LTE      expr                        { BinOp(LEq, $1, $3) }
     | expr GT       expr                        { BinOp(Greater, $1, $3) }
     | expr GTE      expr                        { BinOp(GEq, $1, $3) }
-    | NOT expr                                  { UnOp(Not, $2) }
     | expr AND      expr                        { BinOp(And, $1, $3) }
     | expr OR       expr                        { BinOp(Or, $1, $3) }
-    | ID LPAR call_args RPAR                    { Call($1, $3) }
+    | MINUS expr %prec NEG                      { UnOp(Neg, $2) }
+    | NOT expr                                  { UnOp(Not, $2) }
     | LPAR  expr RPAR                           { $2 }
+    | ID LPAR call_args RPAR                    { Call($1, $3) }
     ;
 
 exprType:

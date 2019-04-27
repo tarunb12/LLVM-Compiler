@@ -1,7 +1,8 @@
 open Ast ;;
 open Exceptions ;;
 
-let getExprType : expr -> datatype =
+(* Transform ast, encode types with respected operation ex.binop *)
+let get_expr_type : expr -> datatype =
   function
     | IntLit _    -> Int_t
     | FloatLit _  -> Float_t

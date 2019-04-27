@@ -76,9 +76,6 @@ rule token = parse
   | "string"            { TYPE_STRING }
   | "unit"              { TYPE_UNIT }
 
-  (* Built-in Functions *)
-  | "print"             { PRINT }
-
   (* Atoms *)
   | int                 { INT (int_of_string lxm) }
   | float               { FLOAT (float_of_string lxm) }

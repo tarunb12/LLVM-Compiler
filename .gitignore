@@ -7,4 +7,5 @@ _build
 _tags
 
 .merlin
+.vscode
 .DS_Store

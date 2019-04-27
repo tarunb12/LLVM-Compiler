@@ -2,5 +2,11 @@
 exception SyntaxError of string
 
 (* Code generation exceptions *)
-exception InvalidType
 exception NotImplemented
+exception IntOpNotSupported
+exception FloatOpNotSupported
+exception UnOpNotSupported
+exception InvalidUnOpType
+exception BinOpNotSupported
+exception CannotMixDatatypes
+exception FunctionNotFound of string
