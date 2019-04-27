@@ -1,4 +1,5 @@
 open Ast ;;
+open Program ;;
 open Exceptions ;;
 
 let context     : Llvm.llcontext  = Llvm.global_context () ;;
@@ -22,11 +23,6 @@ let rec codegen_expr (llbuilder : Llvm.llbuilder) : Llvm.llvalue = function
   | _               -> raise NotImplemented
 
 and handle_binop (expr1 : expr) (expr2 : expr) (op : binOp) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
-  let getExprType (expr : expr) : datatype = match expr with
-    | IntLit int -> Int_t
-    | FloatLit float -> Float_t
-    | _ -> raise InvalidType in
-
   let expr1_t = getExprType expr1 in
   let expr2_t = getExprType expr2 in
 
