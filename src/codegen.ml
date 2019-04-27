@@ -30,8 +30,39 @@ and handle_binop (expr1 : expr) (expr2 : expr) (op : binOp) (llbuilder : Llvm.ll
   let expr1_t = getExprType expr1 in
   let expr2_t = getExprType expr2 in
 
-  let expr1 = 
+  let expr1 = codegen_expr llbuilder expr1 in
+  let expr2 = codegen_expr llbuilder expr2 in
+  ()
   ;;
 
-let codegen_ast =
+let codegen_library_functions () = 
+    let printf_t =  Llvm.var_arg_function_type i32_t [| Llvm.pointer_type i8_t |] in
+    let _ =         Llvm.declare_function "printf" printf_t the_module in
+    let malloc_t =  Llvm.function_type (str_t) [| i32_t |] in
+    let _ =         Llvm.declare_function "malloc" malloc_t the_module in
+    let open_t =    Llvm.function_type i32_t [| (Llvm.pointer_type i8_t); i32_t |] in 
+    let _ =         Llvm.declare_function "open" open_t the_module in
+    let close_t =   Llvm.function_type i32_t [| i32_t |] in
+    let _ =         Llvm.declare_function "close" close_t the_module in
+    let read_t =    Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
+    let _ =         Llvm.declare_function "read" read_t the_module in
+    let write_t =   Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
+    let _ =         Llvm.declare_function "write" write_t the_module in 
+    let lseek_t =   Llvm.function_type i32_t [| i32_t; i32_t; i32_t |] in
+    let _ =         Llvm.declare_function "lseek" lseek_t the_module in
+    let exit_t =    Llvm.function_type void_t [| i32_t |] in
+    let _ =         Llvm.declare_function "exit" exit_t the_module in
+    let realloc_t = Llvm.function_type str_t [| str_t; i32_t |] in
+    let _ =         Llvm.declare_function "realloc" realloc_t the_module in
+    let getchar_t = Llvm.function_type (i32_t) [| |] in
+    let _ =         Llvm.declare_function "getchar" getchar_t the_module in
+    let sizeof_t =  Llvm.function_type (i32_t) [| i32_t |] in
+    let _ =         Llvm.declare_function "sizeof" sizeof_t the_module in 
+    () ;;
+
+
+let codegen_ast (_ast : program) =
+  (* Reserved functions in llvm *)
+  let _ = codegen_library_functions () in
+  the_module ;;
   
