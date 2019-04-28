@@ -7,8 +7,9 @@ $ make tests
 ```
 In order to run the tests, you must have clang installed.
 
-Test inputs are read into the program, which produces its corresponding llvm file, compiled by clang into an executable, and running the executable produces the output file
-(&lt;test&gt;.in  &rightarrow;  &lt;test&gt;.ll  &rightarrow;  &lt;test&gt;.exe  &rightarrow;  &lt;test&gt;.out).
+Test inputs are read into the program, which produces its corresponding llvm file, compiled by clang into an executable, and running the executable produces the output file.
+
+&lt;test&gt;.in |> &lt;test&gt;.ll |> &lt;test&gt;.exe |> &lt;test&gt;.out
 
 ### Package Versions
 | Package           | Version  |
