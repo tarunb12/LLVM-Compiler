@@ -63,7 +63,7 @@ and handle_binop (op : binOp) (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.ll
     | Div     -> Llvm.build_fdiv expr1 expr2 "f_divtmp" llbuilder
     | Eq      -> Llvm.build_fcmp Llvm.Fcmp.Oeq expr1 expr2 "f_eqtmp" llbuilder
     | NEq     -> Llvm.build_fcmp Llvm.Fcmp.One expr1 expr2 "f_neqtmp" llbuilder
-    | Less    -> Llvm.build_fcmp Llvm.Fcmp.Ult expr1 expr2 "f_lesstmp" llbuilder
+    | Less    -> Llvm.build_fcmp Llvm.Fcmp.Olt expr1 expr2 "f_lesstmp" llbuilder
     | LEq     -> Llvm.build_fcmp Llvm.Fcmp.Ole expr1 expr2 "f_leqtmp" llbuilder
     | Greater -> Llvm.build_fcmp Llvm.Fcmp.Ogt expr1 expr2 "f_sgttmp" llbuilder
     | GEq     -> Llvm.build_fcmp Llvm.Fcmp.Oge expr1 expr2 "f_sgetmp" llbuilder
