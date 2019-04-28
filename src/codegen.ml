@@ -52,8 +52,7 @@ and handle_binop (op : binOp) (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.ll
     | Less    -> Llvm.build_icmp Llvm.Icmp.Slt expr1 expr2 "lesstmp" llbuilder
     | LEq     -> Llvm.build_icmp Llvm.Icmp.Sle expr1 expr2 "leqtmp" llbuilder
     | Greater -> Llvm.build_icmp Llvm.Icmp.Sgt expr1 expr2 "sgttmp" llbuilder
-    | GEq     -> Llvm.build_icmp Llvm.Icmp.Sge expr1 expr2 "sgetmp" llbuilder
-    | _       -> raise IntOpNotSupported in
+    | GEq     -> Llvm.build_icmp Llvm.Icmp.Sge expr1 expr2 "sgetmp" llbuilder in
 
   let float_ops (op : binOp) (expr1 : Llvm.llvalue) (expr2 : Llvm.llvalue) : Llvm.llvalue =
     match op with
@@ -198,12 +197,12 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
       else
         begin
           match return_t = void_t with
-          | true  -> ignore Llvm.build_ret_void
+          | true  -> ignore (Llvm.build_ret_void llbuilder)
           | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
         end
     | Llvm.At_start _ ->
       match return_t = void_t with
-      | true  -> ignore Llvm.build_ret_void
+      | true  -> ignore (Llvm.build_ret_void llbuilder)
       | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
   ;;
 
@@ -245,5 +244,5 @@ let codegen_ast (ast : program) : Llvm.llmodule =
     ) stmts in
   the_module ;;
   
-let print_module (m : Llvm.llmodule) : unit =
-  Printf.printf "%s" (Llvm.string_of_llmodule m) ;;
+let print_module (file : string) (m : Llvm.llmodule) : unit =
+  Llvm.print_module file m ;;

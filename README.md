@@ -5,16 +5,19 @@
 $ make
 $ make tests
 ```
+
 In order to run the tests, you must have clang installed.
 
 Test inputs are read into the program, which produces its corresponding llvm file, compiled by clang into an executable, and running the executable produces the output file.
 
 ```ocaml
-   <test>.in
-|> <test>.ll
-|> <test>.exe
-|> <test>.out
+   <test_name>.in
+|> <test_name>.ll
+|> <test_name>.exe
+|> <test_name>.out
 ```
+
+Note: llvm, exe, and out files produced from tests will be in tests/llvm, tests/executables, and tests/results, respectively.
 
 ### Package Versions
 | Package           | Version  |
