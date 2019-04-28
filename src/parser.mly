@@ -79,7 +79,7 @@ func_definition:
         { FuncDef($1, $2, $4, $6) }
     ;
 
-func_declaration_args:
+func_declaration_args: (* Empty list *)         { [] }
     | var_declaration                           { [$1] }
     | func_declaration_args COMMA var_declaration
         { rev ($3 :: $1) }

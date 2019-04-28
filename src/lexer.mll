@@ -26,8 +26,8 @@ let escape_char = '\\' ['\\' '\x27' '\x22' 'n' 'r' 't']
 
 let int = digit+ as lxm
 let float = digit+ '.' digit* as lxm
-let char = '\x27'(ascii|digit as lxm)'\x27'
-let string = '\x22'(ascii|escape_char)'\x22'
+let char = '\x27' (ascii|digit as lxm) '\x27'
+let string = '\x22' ((ascii|escape_char)* as lxm) '\x22'
 let id = (alph | '_')(alph | digit | '_')* as lxm
 
 rule token = parse
@@ -80,6 +80,7 @@ rule token = parse
   | int                 { INT (int_of_string lxm) }
   | float               { FLOAT (float_of_string lxm) }
   | char                { CHAR (lxm) }
+  | string              { STRING (lxm) }
   | id                  { ID (lxm) }
 
   | eof                 { EOF }
