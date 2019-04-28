@@ -12,4 +12,4 @@ let () = open_in filename
   |> program token
   |> codegen_ast
   |> print_module
-	;;
+  ;;
