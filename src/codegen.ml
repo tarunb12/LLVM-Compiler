@@ -28,7 +28,7 @@ let rec codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
     | CharLit char          -> Llvm.const_int i8_t (int_of_char char)
     | BinOp (op, e1, e2)    -> handle_binop op e1 e2 llbuilder
     | UnOp (op, e)          -> handle_unop op e llbuilder
-    | Call (fname, params)  -> codegen_call fname params
+    | Call (fname, params)  -> codegen_call fname params llbuilder
     | _                     -> raise NotImplemented
 
 (* Binary Expression -> LLVM Value *)
@@ -110,7 +110,26 @@ and handle_unop (op : unOp) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.ll
   type_handler data_t
   
 (* Function Call -> LLVM Function Lookup/Execution *)
-and codegen_call (fname : string) (params : expr list) : Llvm.llvalue = Llvm.const_int i32_t 0
+and codegen_call (fname : string) (params : expr list) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  match fname with
+  | "printf"  -> codegen_printf params llbuilder
+  | _         -> codegen_function_call
+
+and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
+  let format_str : expr = List.hd params in
+  let format_llstr : Llvm.llvalue =
+    match format_str with
+    | StringLit str -> Llvm.build_global_stringptr str "fmt" llbuilder
+    | _             -> raise FirstPrintArgumentNotString in
+
+  let args : expr list = List.tl params in
+  let format_llargs = List.map (codegen_expr llbuilder) args in
+
+  let func_llvalue : Llvm.llvalue = llvm_lookup_function "printf" in
+  let llargs = Array.of_list (format_llstr :: format_llargs) in
+  Llvm.build_call func_llvalue llargs "printf" llbuilder
+
+and codegen_function_call = Llvm.const_int i32_t 0
 
 (* Statement -> LLVM Statement Execution *)
 and codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =

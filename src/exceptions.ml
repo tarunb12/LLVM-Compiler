@@ -14,3 +14,4 @@ exception InvalidParameterType
 exception FunctionWithoutBasicBlock of string
 exception LLVMFunctionNotFound of string
 exception InvalidMainReturnType
+exception FirstPrintArgumentNotString
