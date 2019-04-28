@@ -23,6 +23,5 @@ tests: main.byte $(LLVM_FILES)
 	clang $(LLVM_FILES) -o $(EXE_FILES) -Wno-override-module
 	./$(EXE_FILES) > $(OUT_FILES)
 	@echo "Done testing. Results in 'tests/results' dir."
-	@echo $(IN_FILES)
 
 retest: clean tests
