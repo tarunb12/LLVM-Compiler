@@ -10,3 +10,6 @@ exception InvalidUnOpType
 exception BinOpNotSupported
 exception CannotMixDatatypes
 exception FunctionNotFound of string
+exception InvalidParameterType
+exception FunctionWithoutBlock of string
+exception LLVMFunctionNotFound of string

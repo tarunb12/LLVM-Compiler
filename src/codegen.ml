@@ -17,17 +17,18 @@ let named_parameters  : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 
 let llvm_lookup_function (fname : string) : Llvm.llvalue =
   match Llvm.lookup_function fname the_module with
-  | None    -> raise LLVMFunctionNotFound (fname)
+  | None    -> raise (LLVMFunctionNotFound (fname))
   | Some f  -> f ;;
 
-let rec codegen_expr (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+let rec codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
   function
     | FloatLit flt          -> Llvm.const_float float_t flt
     | IntLit int            -> Llvm.const_int i32_t int
     | BoolLit bool          -> if bool then Llvm.const_int i1_t 1 else Llvm.const_int i1_t 0
     | CharLit char          -> Llvm.const_int i8_t (int_of_char char)
     | BinOp (op, e1, e2)    -> handle_binop op e1 e2 llbuilder
-    | Call (fname, params)  -> codegen_call fname params
+    | UnOp (op, e)          -> handle_unop op e llbuilder
+    (* | Call (fname, params)  -> codegen_call fname params *)
     | _                     -> raise NotImplemented
 
 (* Binary Expression -> LLVM Value *)
@@ -61,7 +62,7 @@ and handle_binop (op : binOp) (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.ll
     | Mult    -> Llvm.build_fmul expr1 expr2 "f_multmp" llbuilder
     | Div     -> Llvm.build_fdiv expr1 expr2 "f_divtmp" llbuilder
     | Eq      -> Llvm.build_fcmp Llvm.Fcmp.Oeq expr1 expr2 "f_eqtmp" llbuilder
-    | Neq     -> Llvm.build_fcmp Llvm.Fcmp.One expr1 expr2 "f_neqtmp" llbuilder
+    | NEq     -> Llvm.build_fcmp Llvm.Fcmp.One expr1 expr2 "f_neqtmp" llbuilder
     | Less    -> Llvm.build_fcmp Llvm.Fcmp.Ult expr1 expr2 "f_lesstmp" llbuilder
     | LEq     -> Llvm.build_fcmp Llvm.Fcmp.Ole expr1 expr2 "f_leqtmp" llbuilder
     | Greater -> Llvm.build_fcmp Llvm.Fcmp.Ogt expr1 expr2 "f_sgttmp" llbuilder
@@ -85,7 +86,7 @@ and handle_binop (op : binOp) (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.ll
   type_handler data_t
 
 (* Unary Expression -> LLVM Value *)
-and handle_unop (op : unOp) (expr : expr) : Llvm.llvalue =
+and handle_unop (op : unOp) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
   let expr_t : datatype = get_expr_type expr in
   
   let expr : Llvm.llvalue = codegen_expr llbuilder expr in
@@ -99,7 +100,7 @@ and handle_unop (op : unOp) (expr : expr) : Llvm.llvalue =
 
   let type_handler (data_t : datatype) : Llvm.llvalue =
     match data_t with
-    | Int_t | Float_t | Bool_t  -> unops op expr datatype
+    | Int_t | Float_t | Bool_t  -> un_ops op expr data_t
     | _                         -> raise UnOpNotSupported in
 
   let data_t : datatype =
@@ -110,10 +111,60 @@ and handle_unop (op : unOp) (expr : expr) : Llvm.llvalue =
   type_handler data_t
   
 (* Function Call -> LLVM Function Lookup/Execution *)
-and codegen_call (fname : string) (params : expr list) : Llvm.llvalue = ()
+(* and codegen_call (fname : string) (params : expr list) : Llvm.llvalue = () *)
+
+and codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  match stmt with
+  | Block stmt_list -> List.hd (List.map (fun stmt -> codegen_stmt stmt llbuilder) stmt_list)
+  | Expr expr       -> codegen_expr llbuilder expr
+  | _               -> raise NotImplemented
+  ;;
+
+
+let init_params (f : Llvm.llvalue) (args : statement list) : unit =
+  let args = Array.of_list args in
+  Array.iteri (fun i element ->
+    let param = args.(i) in
+    let named_param =
+      match param with
+      | VarDec (_, name)  -> name
+      | _                 -> raise InvalidParameterType in
+    Llvm.set_value_name named_param element;
+    Hashtbl.add named_parameters named_param element;
+  ) (Llvm.params f)
 
 (* Function Definition -> LLVM Function Store *)
-and codegen_function () : Llvm.llvalue = ()
+let codegen_function (d_type : datatype) (fname : string) (params : statement list) (stmts : statement list) : unit =
+  Hashtbl.clear named_values;
+  Hashtbl.clear named_parameters;
+
+  let f = llvm_lookup_function fname in
+  let llbuilder = Llvm.builder_at_end context (Llvm.entry_block f) in
+
+  let _ = init_params f params in
+  let _ = codegen_stmt (Block (stmts)) llbuilder in
+
+  let last_bb =
+    match Llvm.block_end (llvm_lookup_function fname) with
+    | Llvm.After block  -> block
+    | Llvm.At_start _   -> raise (FunctionWithoutBlock (fname)) in
+
+  let return_t = Llvm.return_type (Llvm.type_of (llvm_lookup_function fname)) in
+
+  match Llvm.instr_end last_bb with
+  | Llvm.After instr ->
+    let op = Llvm.instr_opcode instr in
+    if op = Llvm.Opcode.Ret then ()
+    else
+      begin
+        match return_t = void_t with
+        | true  -> ignore Llvm.build_ret_void
+        | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
+      end
+  | Llvm.At_start _ ->
+    match return_t = void_t with
+    | true  -> ignore Llvm.build_ret_void
+    | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
   ;;
 
 let codegen_library_functions () =
@@ -142,8 +193,13 @@ let codegen_library_functions () =
   () ;;
 
 
-let codegen_ast (_ast : program) =
-  (* Reserved functions in llvm *)
+let codegen_ast (ast : program) =
+  (* Reserved functions in LLVM *)
   let _ = codegen_library_functions () in
+  (* Map statements to LLVM *)
+  let _ = match ast with Program stmts ->
+    List.map (fun stmt -> codegen_stmt stmt builder) stmts in
   the_module ;;
   
+let print_module (m : Llvm.llmodule) =
+  print_string (Llvm.string_of_llmodule m) ;;
