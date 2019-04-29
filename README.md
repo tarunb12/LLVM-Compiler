@@ -38,7 +38,7 @@ int main() {
 By default, main will return the 32-bit integer 0, so the return type is optional.
 
 In general, methods will be structured as follows:
-```ocaml
+```c
 type fname(arg1, arg2, ..., argn) {
    ...
    return n
