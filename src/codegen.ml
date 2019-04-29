@@ -20,7 +20,15 @@ let llvm_lookup_function (fname : string) : Llvm.llvalue =
   | None    -> raise (LLVMFunctionNotFound (fname))
   | Some f  -> f ;;
 
-let rec codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
+(* Statement -> LLVM Statement Execution *)
+let rec codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  match stmt with
+  | Block stmt_list                         -> List.hd (List.map (fun stmt -> codegen_stmt stmt llbuilder) stmt_list)
+  | Expr expr                               -> codegen_expr llbuilder expr
+  | _                                       -> raise NotImplemented
+
+(* Expression -> LLVM Expression Evaluation *)
+and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
   function
     | FloatLit flt          -> Llvm.const_float float_t flt
     | IntLit int            -> Llvm.const_int i32_t int
@@ -115,6 +123,7 @@ and codegen_call (fname : string) (params : expr list) (llbuilder : Llvm.llbuild
   | "printf"  -> codegen_printf params llbuilder
   | _         -> codegen_function_call
 
+(*  *)
 and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
   let format_str : expr = List.hd params in
   let format_llstr : Llvm.llvalue =
@@ -123,20 +132,13 @@ and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
     | _             -> raise FirstPrintArgumentNotString in
 
   let args : expr list = List.tl params in
-  let format_llargs = List.map (codegen_expr llbuilder) args in
+  let format_llargs : Llvm.llvalue list = List.map (codegen_expr llbuilder) args in
 
   let func_llvalue : Llvm.llvalue = llvm_lookup_function "printf" in
-  let llargs = Array.of_list (format_llstr :: format_llargs) in
+  let llargs : Llvm.llvalue array = Array.of_list (format_llstr :: format_llargs) in
   Llvm.build_call func_llvalue llargs "printf" llbuilder
 
 and codegen_function_call = Llvm.const_int i32_t 0
-
-(* Statement -> LLVM Statement Execution *)
-and codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
-  match stmt with
-  | Block stmt_list                         -> List.hd (List.map (fun stmt -> codegen_stmt stmt llbuilder) stmt_list)
-  | Expr expr                               -> codegen_expr llbuilder expr
-  | _                                       -> raise NotImplemented
 
 
 let init_params (f : Llvm.llvalue) (args : statement list) : unit =
@@ -149,7 +151,7 @@ let init_params (f : Llvm.llvalue) (args : statement list) : unit =
       | _                 -> raise InvalidParameterType in
     Llvm.set_value_name named_param element;
     Hashtbl.add named_parameters named_param element;
-  ) (Llvm.params f)
+  ) (Llvm.params f) ;;
 
 (* Main Function Definition -> LLVM Main Function Store *)
 let codegen_main (stmts : statement list) (d_type : datatype) : unit =
@@ -159,21 +161,21 @@ let codegen_main (stmts : statement list) (d_type : datatype) : unit =
       Hashtbl.clear named_values;
       Hashtbl.clear named_parameters;
 
-      let ftype = Llvm.function_type i32_t [| i32_t; Llvm.pointer_type str_t |] in
-      let f = Llvm.define_function "main" ftype the_module in
-      let llbuilder = Llvm.builder_at_end context (Llvm.entry_block f) in
+      let ftype : Llvm.lltype = Llvm.function_type i32_t [| i32_t; Llvm.pointer_type str_t |] in
+      let f : Llvm.llvalue = Llvm.define_function "main" ftype the_module in
+      let llbuilder : Llvm.llbuilder = Llvm.builder_at_end context (Llvm.entry_block f) in
       
-      let argc = Llvm.param f 0 in
-      let argv = Llvm.param f 0 in
+      let argc : Llvm.llvalue = Llvm.param f 0 in
+      let argv : Llvm.llvalue = Llvm.param f 0 in
 
       Llvm.set_value_name "argc" argc;
       Llvm.set_value_name "argv" argv;
       Hashtbl.add named_parameters "argc" argc;
       Hashtbl.add named_parameters "argv" argv;
       
-      let _ = codegen_stmt (Block stmts) llbuilder in
+      let _ : Llvm.llvalue = codegen_stmt (Block stmts) llbuilder in
 
-      let last_basic_block =
+      let last_basic_block : Llvm.llbasicblock =
         match Llvm.block_end (llvm_lookup_function "main") with
         | Llvm.After block  -> block
         | _ -> raise (FunctionWithoutBasicBlock "main") in
@@ -185,7 +187,7 @@ let codegen_main (stmts : statement list) (d_type : datatype) : unit =
         else ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
       | Llvm.At_start _ -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
     end
-  | _ -> raise InvalidMainReturnType
+  | _ -> raise InvalidMainReturnType ;;
 
 
 (* Function Definition -> LLVM Function Store *)
@@ -196,11 +198,11 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
     Hashtbl.clear named_values;
     Hashtbl.clear named_parameters;
 
-    let f = llvm_lookup_function fname in
-    let llbuilder = Llvm.builder_at_end context (Llvm.entry_block f) in
+    let f : Llvm.llvalue = llvm_lookup_function fname in
+    let llbuilder : Llvm.llbuilder = Llvm.builder_at_end context (Llvm.entry_block f) in
 
-    let _ = init_params f params in
-    let _ = codegen_stmt (Block (stmts)) llbuilder in
+    let () = init_params f params in
+    let _ : Llvm.llvalue = codegen_stmt (Block (stmts)) llbuilder in
 
     let last_basic_block =
       match Llvm.block_end (llvm_lookup_function fname) with
@@ -222,40 +224,39 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
     | Llvm.At_start _ ->
       match return_t = void_t with
       | true  -> ignore (Llvm.build_ret_void llbuilder)
-      | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
-  ;;
+      | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder) ;;
 
 let codegen_library_functions () =
-  let printf_t =  Llvm.var_arg_function_type i32_t [| Llvm.pointer_type i8_t |] in
-  let _ =         Llvm.declare_function "printf" printf_t the_module in
-  let malloc_t =  Llvm.function_type (str_t) [| i32_t |] in
-  let _ =         Llvm.declare_function "malloc" malloc_t the_module in
-  let open_t =    Llvm.function_type i32_t [| (Llvm.pointer_type i8_t); i32_t |] in
-  let _ =         Llvm.declare_function "open" open_t the_module in
-  let close_t =   Llvm.function_type i32_t [| i32_t |] in
-  let _ =         Llvm.declare_function "close" close_t the_module in
-  let read_t =    Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
-  let _ =         Llvm.declare_function "read" read_t the_module in
-  let write_t =   Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
-  let _ =         Llvm.declare_function "write" write_t the_module in
-  let lseek_t =   Llvm.function_type i32_t [| i32_t; i32_t; i32_t |] in
-  let _ =         Llvm.declare_function "lseek" lseek_t the_module in
-  let exit_t =    Llvm.function_type void_t [| i32_t |] in
-  let _ =         Llvm.declare_function "exit" exit_t the_module in
-  let realloc_t = Llvm.function_type str_t [| str_t; i32_t |] in
-  let _ =         Llvm.declare_function "realloc" realloc_t the_module in
-  let getchar_t = Llvm.function_type (i32_t) [| |] in
-  let _ =         Llvm.declare_function "getchar" getchar_t the_module in
-  let sizeof_t =  Llvm.function_type (i32_t) [| i32_t |] in
-  let _ =         Llvm.declare_function "sizeof" sizeof_t the_module in
+  let printf_t  : Llvm.lltype   = Llvm.var_arg_function_type i32_t [| Llvm.pointer_type i8_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "printf" printf_t the_module in
+  let malloc_t  : Llvm.lltype   = Llvm.function_type (str_t) [| i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "malloc" malloc_t the_module in
+  let open_t    : Llvm.lltype   = Llvm.function_type i32_t [| (Llvm.pointer_type i8_t); i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "open" open_t the_module in
+  let close_t   : Llvm.lltype   = Llvm.function_type i32_t [| i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "close" close_t the_module in
+  let read_t    : Llvm.lltype   = Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "read" read_t the_module in
+  let write_t   : Llvm.lltype   =  Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "write" write_t the_module in
+  let lseek_t   : Llvm.lltype   = Llvm.function_type i32_t [| i32_t; i32_t; i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "lseek" lseek_t the_module in
+  let exit_t    : Llvm.lltype   = Llvm.function_type void_t [| i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "exit" exit_t the_module in
+  let realloc_t : Llvm.lltype   = Llvm.function_type str_t [| str_t; i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "realloc" realloc_t the_module in
+  let getchar_t : Llvm.lltype   = Llvm.function_type (i32_t) [| |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "getchar" getchar_t the_module in
+  let sizeof_t  : Llvm.lltype   = Llvm.function_type (i32_t) [| i32_t |] in
+  let _         : Llvm.llvalue  = Llvm.declare_function "sizeof" sizeof_t the_module in
   () ;;
 
 
 let codegen_ast (ast : program) : Llvm.llmodule =
   (* Reserved functions in LLVM *)
-  let _ = codegen_library_functions () in
+  let () = codegen_library_functions () in
   (* Map statements to LLVM *)
-  let _ = match ast with Program stmts ->
+  let _ : unit list = match ast with Program stmts ->
     List.map (fun stmt ->
       match stmt with
       | FuncDef (d_type, fname, params, stmts) -> codegen_function d_type fname params stmts
