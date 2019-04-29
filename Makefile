@@ -3,7 +3,7 @@ CFLAGS=-Wno-override-module
 
 IN_FILES=$(wildcard tests/*.in)
 FILES=$(notdir $(IN_FILES))
-LLVM_FILES= $(addprefix tests/llvm/, $(FILES:.in=.ll))
+LLVM_FILES=$(addprefix tests/llvm/, $(FILES:.in=.ll))
 EXE_FILES=$(addprefix tests/executables/, $(FILES:.in=.exe))
 OUT_FILES=$(addprefix tests/results/, $(FILES:.in=.out))
 

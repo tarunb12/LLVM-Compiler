@@ -23,11 +23,12 @@ let llvm_lookup_function (fname : string) : Llvm.llvalue =
 
 (* Data Type -> LLVM Type *)
 let get_lltype : datatype -> Llvm.lltype = function
-  | Int_t   -> i32_t
-  | Float_t -> float_t
-  | Bool_t  -> i1_t
-  | Char_t  -> i8_t
-  | data_t -> raise (InvalidDataType (string_of_datatype data_t)) ;;
+  | Int_t     -> i32_t
+  | Float_t   -> float_t
+  | Bool_t    -> i1_t
+  | Char_t    -> i8_t
+  | String_t  -> str_t
+  | Unit_t    -> void_t ;;
 
 (* Statement -> LLVM Statement Execution *)
 let rec codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
@@ -36,6 +37,7 @@ let rec codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llva
   | Expr expr                               -> codegen_expr llbuilder expr
   | VarDef (data_t, vname, e)               -> codegen_vardef vname data_t e llbuilder
   | _                                       -> raise NotImplemented
+
 
 (* Expression -> LLVM Expression Evaluation *)
 and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
@@ -93,6 +95,7 @@ and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilde
 
   let data_t : datatype = get_binop_type e1 e2 in
   type_handler data_t
+
 
 (* Unary Expression -> LLVM Value *)
 and handle_unop (op : unOp) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
@@ -282,7 +285,7 @@ let codegen_library_functions () =
   let _         : Llvm.llvalue  = Llvm.declare_function "close" close_t the_module in
   let read_t    : Llvm.lltype   = Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
   let _         : Llvm.llvalue  = Llvm.declare_function "read" read_t the_module in
-  let write_t   : Llvm.lltype   =  Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
+  let write_t   : Llvm.lltype   = Llvm.function_type i32_t [| i32_t; Llvm.pointer_type i8_t; i32_t |] in
   let _         : Llvm.llvalue  = Llvm.declare_function "write" write_t the_module in
   let lseek_t   : Llvm.lltype   = Llvm.function_type i32_t [| i32_t; i32_t; i32_t |] in
   let _         : Llvm.llvalue  = Llvm.declare_function "lseek" lseek_t the_module in
@@ -293,7 +296,7 @@ let codegen_library_functions () =
   let getchar_t : Llvm.lltype   = Llvm.function_type (i32_t) [| |] in
   let _         : Llvm.llvalue  = Llvm.declare_function "getchar" getchar_t the_module in
   let sizeof_t  : Llvm.lltype   = Llvm.function_type (i32_t) [| i32_t |] in
-  let _         : Llvm.llvalue  = Llvm.declare_function "sizeof" sizeof_t the_module in
+  let _sizeof         : Llvm.llvalue  = Llvm.declare_function "sizeof" sizeof_t the_module in
   () ;;
 
 

@@ -1,5 +1,5 @@
 (* Parser exceptions *)
-exception SyntaxError of string
+exception SyntaxError of int * string
 
 (* Code generation exceptions *)
 exception BinOpNotSupported

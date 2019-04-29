@@ -3,7 +3,9 @@
   open Lexing
   open Exceptions
 
-  let unescape (str : string) : string = Scanf.sscanf ("\"" ^ str ^ "\"") "%S%!" (fun x -> x)
+  let filename = Sys.argv.(1) ;;
+
+  let unescape (str : string) : string = Scanf.sscanf ("\"" ^ str ^ "\"") "%S%!" (fun x -> x) ;;
 
   let next_line (lexbuf : lexbuf) : unit =
     let pos : position = lexbuf.lex_curr_p in
@@ -11,7 +13,7 @@
       {
         pos with pos_bol = lexbuf.lex_curr_pos;
         pos_lnum = pos.pos_lnum + 1
-      }
+      } ;;
 }
 
 (* Escapes:
@@ -88,7 +90,7 @@ rule token = parse
   | id                  { ID (lxm) }
 
   | eof                 { EOF }
-  | _                   { raise (SyntaxError ("Unexpected char: " ^ lexeme lexbuf)) }
+  | _                   { raise (SyntaxError (lexbuf.lex_curr_p.pos_lnum + 1, lexeme lexbuf)) }
 
 and single_comment = parse
   | '\n'                { token lexbuf }

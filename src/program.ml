@@ -1,7 +1,7 @@
 open Ast ;;
 open Exceptions ;;
 
-(* Functions to get information about AST *)
+(* Functions to get information about / manipulate the AST *)
 
 (* Get expression type *)
 let rec get_expr_type : expr -> datatype = function
@@ -32,3 +32,15 @@ let string_of_datatype : datatype -> string = function
   | Char_t    -> "char"
   | String_t  -> "string"
   | Unit_t    -> "unit" ;;
+
+(* Default error program, which is a call to print an error (this also generates LLVM) *)
+let error_program (error : string) : program = 
+  Program ([
+    FuncDef(Int_t, "main", [], [
+      Expr(
+        Call("printf", [
+          StringLit error
+        ])
+      )
+    ])
+  ]) ;;
