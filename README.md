@@ -13,8 +13,6 @@ Test inputs are read into the program, which produces its corresponding llvm fil
 The input files can be found directly in the tests folder, and the produced llvm, executable, and out files will be
 in the llvm, executables, and results folder respectively within tests.
 
-Note: llvm, exe, and out files produced from tests will be in tests/llvm, tests/executables, and tests/results, respectively.
-
 ### Package Versions
 | Package           | Version  |
 |-------------------|:--------:|
