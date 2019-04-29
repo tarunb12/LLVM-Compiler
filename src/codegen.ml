@@ -40,12 +40,9 @@ and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
     | _                     -> raise NotImplemented
 
 (* Binary Expression -> LLVM Value *)
-and handle_binop (op : binOp) (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
-  let expr1_t : datatype = get_expr_type expr1 in
-  let expr2_t : datatype = get_expr_type expr2 in
-
-  let expr1 : Llvm.llvalue = codegen_expr llbuilder expr1 in
-  let expr2 : Llvm.llvalue = codegen_expr llbuilder expr2 in
+and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  let expr1 : Llvm.llvalue = codegen_expr llbuilder e1 in
+  let expr2 : Llvm.llvalue = codegen_expr llbuilder e2 in
   
   let int_ops (op : binOp) (expr1 : Llvm.llvalue) (expr2 : Llvm.llvalue) : Llvm.llvalue =
     match op with
@@ -82,14 +79,7 @@ and handle_binop (op : binOp) (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.ll
     | Float_t                 -> float_ops op expr1 expr2
     | _                       -> raise BinOpNotSupported in
 
-  let data_t : datatype =
-    match (expr1_t, expr2_t) with
-    | Int_t, Int_t      -> Int_t
-    | Bool_t, Bool_t    -> Bool_t
-    | Char_t, Char_t    -> Char_t
-    | Float_t, Float_t  -> Float_t
-    | _                 -> raise CannotMixDatatypes in
-
+  let data_t : datatype = get_binop_type e1 e2 in
   type_handler data_t
 
 (* Unary Expression -> LLVM Value *)
@@ -213,7 +203,7 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
 
     match Llvm.instr_end last_basic_block with
     | Llvm.After instr ->
-      let op = Llvm.instr_opcode instr in
+      let op : Llvm.Opcode.t = Llvm.instr_opcode instr in
       if op = Llvm.Opcode.Ret then ()
       else
         begin
