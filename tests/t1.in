@@ -1,4 +1,4 @@
 int main() {
-    // hello there
+    // hello world
     printf("test")
 }

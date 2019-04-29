@@ -45,4 +45,4 @@ type fname(arg1, arg2, ..., argn) {
 where type can be one of "int", "float", "bool", "char", or "string".
 
 To print values, the printf function is built into this language, and is very similar to that of c. For example,
-`printf(")`
+`printf("%d + %d = %d", 1, 2, 1 + 2)` will produce `1 + 2 = 3` in the output file. Expressions are NOT automatically printed when they are evaluated, so expressions will need to go through the printf call to be shown in the output file.

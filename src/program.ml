@@ -4,16 +4,15 @@ open Exceptions ;;
 (* Functions to get information about AST *)
 
 (* Get expression type *)
-let rec get_expr_type : expr -> datatype =
-  function
-    | IntLit _          -> Int_t
-    | FloatLit _        -> Float_t
-    | BoolLit _         -> Bool_t
-    | CharLit _         -> Char_t
-    | StringLit _       -> String_t
-    | BinOp (_, e1, e2) -> get_binop_type e1 e2
-    | UnOp (_, e1)      -> get_expr_type e1
-    | _                 -> Unit_t
+let rec get_expr_type : expr -> datatype = function
+  | IntLit _          -> Int_t
+  | FloatLit _        -> Float_t
+  | BoolLit _         -> Bool_t
+  | CharLit _         -> Char_t
+  | StringLit _       -> String_t
+  | BinOp (_, e1, e2) -> get_binop_type e1 e2
+  | UnOp (_, e1)      -> get_expr_type e1
+  | _                 -> Unit_t
 
 (* Get the type of a binary operation *)
 and get_binop_type (e1 : expr) (e2 : expr) : datatype =
