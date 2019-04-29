@@ -24,3 +24,11 @@ and get_binop_type (e1 : expr) (e2 : expr) : datatype =
   | Bool_t, Bool_t -> Bool_t
   | Char_t, Char_t -> Char_t
   | _ -> raise CannotMixDatatypes ;;
+
+let string_of_datatype : datatype -> string = function
+  | Int_t     -> "int"
+  | Float_t   -> "float"
+  | Bool_t    -> "bool"
+  | Char_t    -> "char"
+  | String_t  -> "string"
+  | Unit_t    -> "unit" ;;

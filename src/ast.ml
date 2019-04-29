@@ -22,6 +22,7 @@ type expr =
     | Id        of string
     | BinOp     of binOp * expr * expr
     | UnOp      of unOp * expr
+    | Assign    of expr * expr
     | Call      of string * expr list
     | Noexpr
     ;;

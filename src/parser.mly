@@ -43,8 +43,8 @@ stmt_list:
     ;
 
 block:
-    | LBRACE stmts RBRACE                       { $2 }
     | LBRACE RBRACE                             { [] }
+    | LBRACE stmts RBRACE                       { $2 }
     ;
 
 stmt:
@@ -108,6 +108,7 @@ expr:
     | expr GTE      expr                        { BinOp(GEq, $1, $3) }
     | expr AND      expr                        { BinOp(And, $1, $3) }
     | expr OR       expr                        { BinOp(Or, $1, $3) }
+    | expr ASSIGN   expr                        { Assign($1, $3) }
     | MINUS expr %prec NEG                      { UnOp(Neg, $2) }
     | NOT expr                                  { UnOp(Not, $2) }
     | LPAR  expr RPAR                           { $2 }

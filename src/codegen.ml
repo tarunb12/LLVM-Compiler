@@ -15,16 +15,26 @@ let str_t       : Llvm.lltype     = Llvm.pointer_type (Llvm.i8_type context) ;;
 let named_values      : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 let named_parameters  : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 
+(* Function Name -> LLVM Function *)
 let llvm_lookup_function (fname : string) : Llvm.llvalue =
   match Llvm.lookup_function fname the_module with
   | None    -> raise (LLVMFunctionNotFound (fname))
   | Some f  -> f ;;
+
+(* Data Type -> LLVM Type *)
+let get_lltype : datatype -> Llvm.lltype = function
+  | Int_t   -> i32_t
+  | Float_t -> float_t
+  | Bool_t  -> i1_t
+  | Char_t  -> i8_t
+  | data_t -> raise (InvalidDataType (string_of_datatype data_t)) ;;
 
 (* Statement -> LLVM Statement Execution *)
 let rec codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
   match stmt with
   | Block stmt_list                         -> List.hd (List.map (fun stmt -> codegen_stmt stmt llbuilder) stmt_list)
   | Expr expr                               -> codegen_expr llbuilder expr
+  | VarDef (data_t, vname, e)               -> codegen_vardef vname data_t e llbuilder
   | _                                       -> raise NotImplemented
 
 (* Expression -> LLVM Expression Evaluation *)
@@ -36,8 +46,10 @@ and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
     | CharLit char          -> Llvm.const_int i8_t (int_of_char char)
     | BinOp (op, e1, e2)    -> handle_binop op e1 e2 llbuilder
     | UnOp (op, e)          -> handle_unop op e llbuilder
+    | Assign (e1, e2)       -> codegen_assign e1 e2 llbuilder
     | Call (fname, params)  -> codegen_call fname params llbuilder
     | _                     -> raise NotImplemented
+
 
 (* Binary Expression -> LLVM Value *)
 and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
@@ -106,12 +118,58 @@ and handle_unop (op : unOp) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.ll
     | _                         -> raise UnOpNotSupported in
 
   type_handler data_t
-  
+
+
+(*  *)
+and codegen_assign (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  let rhs : Llvm.llvalue = codegen_expr llbuilder expr2 in
+  let lhs : Llvm.llvalue =
+    match expr1 with
+    | Id id ->
+      begin
+        try Hashtbl.find named_parameters id
+        with Not_found ->
+          try Hashtbl.find named_values id
+          with Not_found -> raise (UndefinedId id)
+      end
+    | _ -> raise LeftHandSideUnassignable in
+
+  ignore (Llvm.build_store rhs lhs llbuilder);
+  rhs
+
+
+(* Variable definition -> LLVM Store Variable, Value *)
+and codegen_vardef (vname : string) (data_t : datatype) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  let expr_t = get_expr_type expr in
+  match data_t = expr_t with
+  | true ->
+    begin
+      let lltype : Llvm.lltype = get_lltype data_t in
+      let malloc : Llvm.llvalue = Llvm.build_malloc lltype vname llbuilder in
+
+      Hashtbl.add named_values vname malloc;
+
+      let lhs : expr = Id vname in
+      match expr with
+      | Noexpr  -> malloc
+      | _       -> codegen_assign lhs expr llbuilder
+    end
+  | false -> 
+    let data_t : string = string_of_datatype data_t in
+    let expr_t : string = string_of_datatype expr_t in
+    raise (InvalidDefinitionType ("The specified type " ^ data_t ^ " of the variable \"" ^ vname ^ "\" does not match expression of type " ^ expr_t))
+
+
+(*  *)
+and codegen_function_call = Llvm.const_int i32_t 0
+
+
 (* Function Call -> LLVM Function Lookup/Execution *)
 and codegen_call (fname : string) (params : expr list) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
   match fname with
   | "printf"  -> codegen_printf params llbuilder
   | _         -> codegen_function_call
+
 
 (*  *)
 and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
@@ -126,10 +184,7 @@ and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
 
   let func_llvalue : Llvm.llvalue = llvm_lookup_function "printf" in
   let llargs : Llvm.llvalue array = Array.of_list (format_llstr :: format_llargs) in
-  Llvm.build_call func_llvalue llargs "printf" llbuilder
-
-and codegen_function_call = Llvm.const_int i32_t 0
-
+  Llvm.build_call func_llvalue llargs "printf" llbuilder ;;
 
 let init_params (f : Llvm.llvalue) (args : statement list) : unit =
   let args = Array.of_list args in
