@@ -3,6 +3,8 @@
   open Lexing
   open Exceptions
 
+  let unescape s = Scanf.sscanf ("\"" ^ s ^ "\"") "%S%!" (fun x -> x)
+
   let next_line lexbuf =
     let pos = lexbuf.lex_curr_p in
     lexbuf.lex_curr_p <-
@@ -27,6 +29,7 @@ let escape_char = '\\' ['\\' '\x27' '\x22' 'n' 'r' 't']
 let int = digit+ as lxm
 let float = digit+ '.' digit* as lxm
 let char = '\x27' (ascii|digit as lxm) '\x27'
+let escape_char_lit = '\x27' (escape_char as lxm) '\x27'
 let string = '\x22' ((ascii|escape_char)* as lxm) '\x22'
 let id = (alph | '_')(alph | digit | '_')* as lxm
 
@@ -80,7 +83,8 @@ rule token = parse
   | int                 { INT (int_of_string lxm) }
   | float               { FLOAT (float_of_string lxm) }
   | char                { CHAR (lxm) }
-  | string              { STRING (lxm) }
+  | escape_char_lit     { CHAR (String.get (unescape lxm) 0) }
+  | string              { STRING (unescape lxm) }
   | id                  { ID (lxm) }
 
   | eof                 { EOF }

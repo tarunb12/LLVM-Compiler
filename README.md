@@ -26,3 +26,17 @@ Note: llvm, exe, and out files produced from tests will be in tests/llvm, tests/
 | menhir            | 20181113 |
 
 <sup>*</sup>Both the LLVM compiler and opam package are version 8.0.0
+
+## Language Features
+
+### Syntax/Structure
+
+Each file must have a main method as the entry point to the program (which LLVM requires). The main method should look as follows:
+
+```c
+int main() {
+   ...
+}
+```
+
+By default, main will return the 32-bit integer 0, so the return type is optional for main.
