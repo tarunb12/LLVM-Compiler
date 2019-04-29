@@ -91,4 +91,5 @@ rule token = parse
   | _                   { raise (SyntaxError ("Unexpected char: " ^ lexeme lexbuf)) }
 
 and single_comment = parse
-  | _         { single_comment lexbuf }
+  | '\n'                { token lexbuf }
+  | _                   { single_comment lexbuf }
