@@ -10,12 +10,8 @@ In order to run the tests, you must have clang installed.
 
 Test inputs are read into the program, which produces its corresponding llvm file, compiled by clang into an executable, and running the executable produces the output file.
 
-```ocaml
-   <test_name>.in
-|> <test_name>.ll
-|> <test_name>.exe
-|> <test_name>.out
-```
+The input files can be found directly in the tests folder, and the produced llvm, executable, and out files will be
+in the llvm, executables, and results folder respectively within tests.
 
 Note: llvm, exe, and out files produced from tests will be in tests/llvm, tests/executables, and tests/results, respectively.
 
@@ -39,4 +35,16 @@ int main() {
 }
 ```
 
-By default, main will return the 32-bit integer 0, so the return type is optional for main.
+By default, main will return the 32-bit integer 0, so the return type is optional.
+
+In general, methods will be structured as follows:
+```ocaml
+type fname(arg1, arg2, ..., argn) {
+   ...
+   return n
+}
+```
+where type can be one of "int", "float", "bool", "char", or "string".
+
+To print values, the printf function is built into this language, and is very similar to that of c. For example,
+`printf(")`
