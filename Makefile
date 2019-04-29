@@ -1,8 +1,11 @@
+CC=clang
+CFLAGS=-Wno-override-module
+
 IN_FILES=$(wildcard tests/*.in)
 FILES=$(notdir $(IN_FILES))
-LLVM_FILES= tests/llvm/$(FILES:.in=.ll)
-EXE_FILES=tests/executables/$(FILES:.in=.exe)
-OUT_FILES=tests/results/$(FILES:.in=.out)
+LLVM_FILES= $(addprefix tests/llvm/, $(FILES:.in=.ll))
+EXE_FILES=$(addprefix tests/executables/, $(FILES:.in=.exe))
+OUT_FILES=$(addprefix tests/results/, $(FILES:.in=.out))
 
 default: main.byte
 
@@ -18,10 +21,14 @@ main.byte:
 
 tests/llvm/%.ll: tests/%.in main.byte
 	./main.byte $< $@
+	
+tests/executables/%.exe: tests/llvm/%.ll
+	$(CC) $(CFLAGS) $< -o $@
 
-tests: main.byte $(LLVM_FILES)
-	clang $(LLVM_FILES) -o $(EXE_FILES) -Wno-override-module
-	./$(EXE_FILES) > $(OUT_FILES)
+tests/results/%.out: tests/executables/%.exe
+	./$< > $@
+
+tests: main.byte $(LLVM_FILES) $(EXE_FILES) $(OUT_FILES)
 	@echo "Done testing. Results in 'tests/results' dir."
 
 retest: clean tests
