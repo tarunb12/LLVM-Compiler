@@ -1,4 +1,4 @@
 int main() {
     int x = 1
-    printf("testing: %d %d", 1 * 2 * 3 * 4, false)
+    printf("testing: %f", 5.0)
 }
