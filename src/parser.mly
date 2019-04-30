@@ -4,7 +4,7 @@
 %}
 
 %token TYPE_INT TYPE_FLOAT TYPE_BOOL TYPE_CHAR TYPE_STRING TYPE_UNIT
-%token ASSIGN LT LTE GT GTE EQ NEQ TRUE FALSE
+%token ASSIGN LT LTE GT GTE EQ NEQ
 %token LPAR RPAR LBRACE RBRACE COMMA SEMI
 %token PLUS MINUS MUL DIV MOD AND OR XOR NOT
 %token IF ELSE FOR WHILE BREAK CONTINUE RETURN
@@ -13,6 +13,7 @@
 %token <int> INT
 %token <float> FLOAT
 %token <char> CHAR
+%token <bool> BOOL
 %token <string> STRING
 %token <string> ID
 
@@ -128,10 +129,9 @@ exprType:
     ;
 
 atom:
-    | TRUE                                      { BoolLit(true) }
-    | FALSE                                     { BoolLit(false) }
     | INT                                       { IntLit($1) }
     | FLOAT                                     { FloatLit($1) }
     | CHAR                                      { CharLit($1) }
+    | BOOL                                      { BoolLit($1) }
     | STRING                                    { StringLit($1) }                    
     ;    

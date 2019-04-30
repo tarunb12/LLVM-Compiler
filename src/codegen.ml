@@ -45,7 +45,7 @@ let rec codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llva
 and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
   function
     | FloatLit flt          -> Llvm.const_float float_t flt
-    | IntLit int            -> print_string (Llvm.string_of_llvalue (Llvm.const_int i32_t int)); Llvm.const_int i32_t int
+    | IntLit int            -> Llvm.const_int i32_t int
     | BoolLit bool          -> if bool then Llvm.const_int i1_t 1 else Llvm.const_int i1_t 0
     | CharLit char          -> Llvm.const_int i8_t (int_of_char char)
     | BinOp (op, e1, e2)    -> handle_binop op e1 e2 llbuilder
@@ -189,8 +189,9 @@ and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
 
   let args : expr list = List.tl params in
   let format_llargs : Llvm.llvalue list = List.map (fun arg ->
-    match arg with
-    | FloatLit _ -> Llvm.const_fpext (codegen_expr llbuilder arg) double_t
+    let arg_t : datatype = get_expr_type arg in
+    match arg_t with
+    | Float_t -> Llvm.const_fpext (codegen_expr llbuilder arg) double_t
     | _ -> codegen_expr llbuilder arg
   ) args in
 

@@ -47,6 +47,5 @@ encoded as 1-bit integers, characters as 8-bit integers, and Integers as 32-bit 
 point types, and strings are 8-bit integer pointers. When performing binary operations on these types (excluding string), both expressions being operated on should have the same type, or an error will be thrown, even though many
 of these types are stored as integers. Floats cannot perform
 
-To print values, the printf function is built into this language, and is very similar to that of c. For example,
-
+To print values, the printf function is built into this language, and is very similar to that of c. For example,  
 `printf("%d + %d = %d", 1, 2, 1 + 2)` will produce `1 + 2 = 3` in the output file. Expressions are NOT automatically printed when they are evaluated, so expressions will need to go through the printf call to be shown in the output file.
