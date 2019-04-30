@@ -1,7 +1,6 @@
 *.byte
 *.ll
 *.exe
-*.out
 
 _build
 _tags

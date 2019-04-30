@@ -1,6 +1,6 @@
 # Compile options (OCaml)
 OC=ocamlbuild
-OFLAGS=-use-ocamlfind -use-menhir -pkgs llvm
+OFLAGS=-use-menhir -use-ocamlfind -pkgs llvm
 
 # Compile options (LLVM)
 CC=clang

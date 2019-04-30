@@ -2,13 +2,15 @@ open Ast ;;
 open Program ;;
 open Exceptions ;;
 
+let filename    : string          = Sys.argv.(1) ;;
 let context     : Llvm.llcontext  = Llvm.global_context () ;;
-let the_module  : Llvm.llmodule   = Llvm.create_module context "thx dobra" ;;
+let the_module  : Llvm.llmodule   = Llvm.create_module context filename ;;
 let builder     : Llvm.llbuilder  = Llvm.builder context ;;
 let i32_t       : Llvm.lltype     = Llvm.i32_type context ;;
 let i8_t        : Llvm.lltype     = Llvm.i8_type context ;;
 let i1_t        : Llvm.lltype     = Llvm.i1_type context ;;
 let float_t     : Llvm.lltype     = Llvm.float_type context ;;
+let double_t    : Llvm.lltype     = Llvm.double_type context ;;
 let void_t      : Llvm.lltype     = Llvm.void_type context ;;
 let str_t       : Llvm.lltype     = Llvm.pointer_type (Llvm.i8_type context) ;;
 
@@ -43,7 +45,7 @@ let rec codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llva
 and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
   function
     | FloatLit flt          -> Llvm.const_float float_t flt
-    | IntLit int            -> Llvm.const_int i32_t int
+    | IntLit int            -> print_string (Llvm.string_of_llvalue (Llvm.const_int i32_t int)); Llvm.const_int i32_t int
     | BoolLit bool          -> if bool then Llvm.const_int i1_t 1 else Llvm.const_int i1_t 0
     | CharLit char          -> Llvm.const_int i8_t (int_of_char char)
     | BinOp (op, e1, e2)    -> handle_binop op e1 e2 llbuilder
@@ -186,7 +188,11 @@ and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
     | _             -> raise FirstPrintArgumentNotString in
 
   let args : expr list = List.tl params in
-  let format_llargs : Llvm.llvalue list = List.map (codegen_expr llbuilder) args in
+  let format_llargs : Llvm.llvalue list = List.map (fun arg ->
+    match arg with
+    | FloatLit _ -> Llvm.const_fpext (codegen_expr llbuilder arg) double_t
+    | _ -> codegen_expr llbuilder arg
+  ) args in
 
   let func_llvalue : Llvm.llvalue = llvm_lookup_function "printf" in
   let llargs : Llvm.llvalue array = Array.of_list (format_llstr :: format_llargs) in
@@ -299,7 +305,7 @@ let codegen_library_functions () =
   let getchar_t : Llvm.lltype   = Llvm.function_type (i32_t) [| |] in
   let _         : Llvm.llvalue  = Llvm.declare_function "getchar" getchar_t the_module in
   let sizeof_t  : Llvm.lltype   = Llvm.function_type (i32_t) [| i32_t |] in
-  let _sizeof         : Llvm.llvalue  = Llvm.declare_function "sizeof" sizeof_t the_module in
+  let _         : Llvm.llvalue  = Llvm.declare_function "sizeof" sizeof_t the_module in
   () ;;
 
 
