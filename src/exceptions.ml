@@ -1,14 +1,14 @@
+open Ast ;;
+
 (* Parser exceptions *)
 exception SyntaxError of int * string
 
 (* Code generation exceptions *)
 exception BinaryOperationNotSupported
-exception BinaryOperationOnDifferentTypes of string * string
-exception BinaryOperationOnString
-exception BinaryOperationOnUnit
+exception BinaryOperationOnDifferentTypes of datatype * datatype
+exception BinaryOperationOnType of datatype
 exception FirstPrintArgumentNotString
 exception FloatOpNotSupported
-exception FunctionNotFound of string
 exception FunctionWithoutBasicBlock of string
 exception IntOpNotSupported
 exception InvalidDataType of string

@@ -7,7 +7,8 @@ open Codegen ;;
 let filename : string = Sys.argv.(1) ;;
 let out_file : string = Sys.argv.(2) ;;
 
-let produce_error (error : string) : unit = error_program error
+let produce_error (exn : exn) : unit = string_of_exception filename exn
+  |> error_program
   |> codegen_ast
   |> print_module out_file ;;
 
@@ -16,4 +17,4 @@ let () = try open_in filename
   |> program token
   |> codegen_ast
   |> print_module out_file
-  with exn -> handle_exception filename produce_error exn ;;
+  with exn -> produce_error exn ;;

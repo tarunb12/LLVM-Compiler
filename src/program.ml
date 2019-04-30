@@ -3,6 +3,22 @@ open Exceptions ;;
 
 (* Functions to get information about / manipulate the AST *)
 
+let string_of_binop : binOp -> string = function
+  | Add     -> "+"
+  | Sub     -> "-"
+  | Mult    -> "*"
+  | Div     -> "/"
+  | Mod     -> "%"
+  | And     -> "&&"
+  | Or      -> "||"
+  | Xor     -> "^"
+  | Eq      -> "=="
+  | NEq     -> "!="
+  | Less    -> "<"
+  | LEq     -> "<="
+  | Greater -> ">"
+  | GEq     -> ">=" ;;
+
 let string_of_datatype : datatype -> string = function
   | Int_t     -> "int"
   | Float_t   -> "float"
@@ -31,9 +47,9 @@ and get_binop_type (e1 : expr) (e2 : expr) : datatype =
   | Float_t, Float_t -> Float_t
   | Bool_t, Bool_t -> Bool_t
   | Char_t, Char_t -> Char_t
-  | String_t, _ | _, String_t -> raise BinaryOperationOnString
-  | Unit_t, _ | _, Unit_t -> raise BinaryOperationOnUnit
-  | _ -> raise (BinaryOperationOnDifferentTypes (string_of_datatype e1_t, string_of_datatype e2_t)) ;;
+  | String_t, _ | _, String_t -> raise (BinaryOperationOnType String_t)
+  | Unit_t, _ | _, Unit_t -> raise (BinaryOperationOnType String_t)
+  | _ -> raise (BinaryOperationOnDifferentTypes (e1_t, e2_t)) ;;
 
 (* Default error program, which is a call to print an error (this also generates LLVM) *)
 let error_program (error : string) : program = 
@@ -47,6 +63,10 @@ let error_program (error : string) : program =
     ])
   ]) ;;
 
-let handle_exception (filename : string) (produce_error : string -> unit) : exn -> unit = function
-  | SyntaxError (line, err) -> produce_error ("Syntax error: File \"" ^ filename ^ "\", line " ^ string_of_int line ^ ": " ^ err)
-  | _ -> produce_error ("Error: File \"" ^ filename ^ "\"") ;;
+let string_of_exception (filename : string) : exn -> string = function
+  | BinaryOperationOnDifferentTypes (e1_t, e2_t) -> "Error: File \"" ^ filename ^ "\"" ^ ": Cannot perform binary operation of types " ^ (string_of_datatype e1_t) ^ " and " ^ (string_of_datatype e2_t) ^ "."
+  | BinaryOperationOnType data_t -> "Error: File \"" ^ filename ^ "\": Cannot perform binary operation on type" ^ string_of_datatype data_t ^ "."
+  | LLVMFunctionNotFound fname -> "Error: File \"" ^ filename ^ "\": Could not find any function with the name \"" ^ fname ^ "\"."
+  | SyntaxError (line, err) -> "Syntax error: File \"" ^ filename ^ "\", line " ^ string_of_int line ^ ": " ^ err
+  | UndefinedId id -> "Error: File \"" ^ filename ^ "\": \"" ^ id ^ "\" is not defined."
+  | _ -> "Error: File \"" ^ filename ^ "\"." ;;
