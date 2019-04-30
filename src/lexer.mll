@@ -52,6 +52,7 @@ rule token = parse
   | '-'                 { MINUS }
   | '*'                 { MUL }
   | '/'                 { DIV }
+  | '%'                 { MOD }
   
   (* Bool Operators *)
   | "=="                { EQ }
@@ -63,6 +64,7 @@ rule token = parse
   | '!'                 { NOT }
   | "&&"                { AND }
   | "||"                { OR }
+  | '^'                 { XOR }
 
   (* Conditionals *)
   | "if"                { IF }

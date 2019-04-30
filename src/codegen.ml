@@ -64,8 +64,10 @@ and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilde
     | Sub     -> Llvm.build_sub expr1 expr2 "subtmp" llbuilder
     | Mult    -> Llvm.build_mul expr1 expr2 "multmp" llbuilder
     | Div     -> Llvm.build_sdiv expr1 expr2 "divtmp" llbuilder
+    | Mod     -> Llvm.build_srem expr1 expr2 "sremtmp" llbuilder
     | And     -> Llvm.build_and expr1 expr2 "andtmp" llbuilder
     | Or      -> Llvm.build_or expr1 expr2 "ortmp" llbuilder
+    | Xor     -> Llvm.build_xor expr1 expr2 "xortmp" llbuilder
     | Eq      -> Llvm.build_icmp Llvm.Icmp.Eq expr1 expr2 "eqtmp" llbuilder
     | NEq     -> Llvm.build_icmp Llvm.Icmp.Ne expr1 expr2 "neqtmp" llbuilder
     | Less    -> Llvm.build_icmp Llvm.Icmp.Slt expr1 expr2 "lesstmp" llbuilder
@@ -79,6 +81,7 @@ and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilde
     | Sub     -> Llvm.build_fsub expr1 expr2 "f_subtmp" llbuilder
     | Mult    -> Llvm.build_fmul expr1 expr2 "f_multmp" llbuilder
     | Div     -> Llvm.build_fdiv expr1 expr2 "f_divtmp" llbuilder
+    | Mod     -> Llvm.build_frem expr1 expr2 "f_sremtmp" llbuilder
     | Eq      -> Llvm.build_fcmp Llvm.Fcmp.Oeq expr1 expr2 "f_eqtmp" llbuilder
     | NEq     -> Llvm.build_fcmp Llvm.Fcmp.One expr1 expr2 "f_neqtmp" llbuilder
     | Less    -> Llvm.build_fcmp Llvm.Fcmp.Olt expr1 expr2 "f_lesstmp" llbuilder
@@ -91,7 +94,7 @@ and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilde
     match data_t with
     | Int_t | Bool_t | Char_t -> int_ops op expr1 expr2
     | Float_t                 -> float_ops op expr1 expr2
-    | _                       -> raise BinOpNotSupported in
+    | _                       -> raise BinaryOperationNotSupported in
 
   let data_t : datatype = get_binop_type e1 e2 in
   type_handler data_t

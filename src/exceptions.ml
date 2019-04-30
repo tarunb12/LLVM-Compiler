@@ -2,8 +2,10 @@
 exception SyntaxError of int * string
 
 (* Code generation exceptions *)
-exception BinOpNotSupported
-exception CannotMixDatatypes
+exception BinaryOperationNotSupported
+exception BinaryOperationOnDifferentTypes of string * string
+exception BinaryOperationOnString
+exception BinaryOperationOnUnit
 exception FirstPrintArgumentNotString
 exception FloatOpNotSupported
 exception FunctionNotFound of string

@@ -1,7 +1,7 @@
 type binOp = 
     | Add | Sub | Mult | Div | And
     | Or | Eq | NEq | Less | LEq
-    | Greater | GEq
+    | Greater | GEq | Mod | Xor
     ;;
 
 type unOp =

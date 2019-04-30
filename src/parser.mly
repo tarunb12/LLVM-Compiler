@@ -6,7 +6,7 @@
 %token TYPE_INT TYPE_FLOAT TYPE_BOOL TYPE_CHAR TYPE_STRING TYPE_UNIT
 %token ASSIGN LT LTE GT GTE EQ NEQ TRUE FALSE
 %token LPAR RPAR LBRACE RBRACE COMMA SEMI
-%token PLUS MINUS MUL DIV AND OR NOT
+%token PLUS MINUS MUL DIV MOD AND OR XOR NOT
 %token IF ELSE FOR WHILE BREAK CONTINUE RETURN
 %token EOF
 
@@ -101,6 +101,7 @@ expr:
     | expr MINUS    expr                        { BinOp(Sub, $1, $3) }
     | expr MUL      expr                        { BinOp(Mult, $1, $3) }
     | expr DIV      expr                        { BinOp(Div, $1, $3) }
+    | expr MOD      expr                        { BinOp(Mod, $1, $3) }
     | expr EQ       expr                        { BinOp(Eq, $1, $3) }
     | expr NEQ      expr                        { BinOp(NEq, $1, $3) }
     | expr LT       expr                        { BinOp(Less, $1, $3) }
@@ -109,6 +110,7 @@ expr:
     | expr GTE      expr                        { BinOp(GEq, $1, $3) }
     | expr AND      expr                        { BinOp(And, $1, $3) }
     | expr OR       expr                        { BinOp(Or, $1, $3) }
+    | expr XOR      expr                        { BinOp(Xor, $1, $3) }
     | expr ASSIGN   expr                        { Assign($1, $3) }
     | MINUS expr %prec NEG                      { UnOp(Neg, $2) }
     | NOT expr                                  { UnOp(Not, $2) }
