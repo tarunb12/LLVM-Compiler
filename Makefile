@@ -3,6 +3,7 @@ CFLAGS=-Wno-override-module
 
 IN_FILES=$(wildcard tests/*.in)
 FILES=$(notdir $(IN_FILES))
+
 LLVM_FILES=$(addprefix tests/llvm/, $(FILES:.in=.ll))
 EXE_FILES=$(addprefix tests/executables/, $(FILES:.in=.exe))
 OUT_FILES=$(addprefix tests/results/, $(FILES:.in=.out))
@@ -29,6 +30,6 @@ tests/results/%.out: tests/executables/%.exe
 	./$< > $@
 
 tests: main.byte $(LLVM_FILES) $(EXE_FILES) $(OUT_FILES)
-	@echo "Done testing. Results in 'tests/results' dir."
+	@echo "Done testing. Generated LLVM code in \"tests/llvm\", Results in \"tests/results\" dir."
 
 retest: clean tests

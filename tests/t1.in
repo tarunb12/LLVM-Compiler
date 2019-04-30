@@ -1,5 +1,5 @@
 int main() {
-    // hello world
-    @@
+    // hello world @@
+    @@ look at this error
     printf("test")
 }

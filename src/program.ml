@@ -36,9 +36,9 @@ let string_of_datatype : datatype -> string = function
 (* Default error program, which is a call to print an error (this also generates LLVM) *)
 let error_program (error : string) : program = 
   Program ([
-    FuncDef(Int_t, "main", [], [
-      Expr(
-        Call("printf", [
+    FuncDef (Int_t, "main", [], [
+      Expr (
+        Call ("printf", [
           StringLit error
         ])
       )

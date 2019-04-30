@@ -1,7 +1,7 @@
 {
-  open Parser
-  open Lexing
-  open Exceptions
+  open Parser ;;
+  open Lexing ;;
+  open Exceptions ;;
 
   let filename = Sys.argv.(1) ;;
 
@@ -26,13 +26,13 @@ let ws = ['\x20' '\t']
 let digit = ['0'-'9']
 let alph = ['a'-'z' 'A'-'Z']
 let ascii = [' '-'!' '#'-'[' ']'-'~']
-let escape_char = '\\' ['\\' '\x27' '\x22' 'n' 'r' 't']
+let escape = '\\' ['\\' '\x27' '\x22' 'n' 'r' 't']
 
 let int = digit+ as lxm
 let float = digit+ '.' digit* as lxm
 let char = '\x27' (ascii|digit as lxm) '\x27'
-let escape_char_lit = '\x27' (escape_char as lxm) '\x27'
-let string = '\x22' ((ascii|escape_char)* as lxm) '\x22'
+let escape_char = '\x27' (escape as lxm) '\x27'
+let string = '\x22' ((ascii|escape)* as lxm) '\x22'
 let id = (alph | '_')(alph | digit | '_')* as lxm
 
 rule token = parse
@@ -85,10 +85,11 @@ rule token = parse
   | int                 { INT (int_of_string lxm) }
   | float               { FLOAT (float_of_string lxm) }
   | char                { CHAR (lxm) }
-  | escape_char_lit     { CHAR (String.get (unescape lxm) 0) }
+  | escape_char         { CHAR (String.get (unescape lxm) 0) }
   | string              { STRING (unescape lxm) }
   | id                  { ID (lxm) }
 
+  (* Anything else *)
   | eof                 { EOF }
   | _                   { raise (SyntaxError (lexbuf.lex_curr_p.pos_lnum + 1, lexeme lexbuf)) }
 

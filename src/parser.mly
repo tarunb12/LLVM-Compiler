@@ -1,6 +1,6 @@
 %{
-    open List
-    open Ast
+    open List ;;
+    open Ast ;;
 %}
 
 %token TYPE_INT TYPE_FLOAT TYPE_BOOL TYPE_CHAR TYPE_STRING TYPE_UNIT
@@ -72,6 +72,7 @@ var_declaration:
 
 var_definition:
     | exprType ID ASSIGN expr                   { VarDef($1, $2, $4) }
+    | ID ASSIGN expr                            { VarRedef($1, $3) }
     ;
 
 func_definition:
