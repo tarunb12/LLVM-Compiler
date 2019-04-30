@@ -1,1 +1,1 @@
-bool: 1, float: 0.333
+Error: File "tests/t2.in": Cannot perform binary operation of types int and float.

@@ -67,6 +67,6 @@ let string_of_exception (filename : string) : exn -> string = function
   | BinaryOperationOnDifferentTypes (e1_t, e2_t) -> "Error: File \"" ^ filename ^ "\"" ^ ": Cannot perform binary operation of types " ^ (string_of_datatype e1_t) ^ " and " ^ (string_of_datatype e2_t) ^ "."
   | BinaryOperationOnType data_t -> "Error: File \"" ^ filename ^ "\": Cannot perform binary operation on type" ^ string_of_datatype data_t ^ "."
   | LLVMFunctionNotFound fname -> "Error: File \"" ^ filename ^ "\": Could not find any function with the name \"" ^ fname ^ "\"."
-  | SyntaxError (line, err) -> "Syntax error: File \"" ^ filename ^ "\", line " ^ string_of_int line ^ ": " ^ err
+  | SyntaxError (line, err) -> "Syntax error: File \"" ^ filename ^ "\", line " ^ string_of_int line ^ ": " ^ err ^ "."
   | UndefinedId id -> "Error: File \"" ^ filename ^ "\": \"" ^ id ^ "\" is not defined."
   | _ -> "Error: File \"" ^ filename ^ "\"." ;;

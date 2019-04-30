@@ -321,6 +321,11 @@ let codegen_ast (ast : program) : Llvm.llmodule =
       | _ -> ignore (codegen_stmt stmt builder)
     ) stmts in
   the_module ;;
-  
+
+let delete_main () =
+  try let main = llvm_lookup_function "main" in
+    Llvm.delete_function main
+  with LLVMFunctionNotFound _ -> ();;
+
 let print_module (file : string) (m : Llvm.llmodule) : unit =
   Llvm.print_module file m ;;
