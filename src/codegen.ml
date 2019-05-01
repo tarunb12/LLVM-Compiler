@@ -52,9 +52,9 @@ and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
     | BinOp (op, e1, e2)    -> handle_binop op e1 e2 llbuilder
     | UnOp (op, e)          -> handle_unop op e llbuilder
     | Assign (e1, e2)       -> codegen_assign e1 e2 llbuilder
+    | Id id                 -> codegen_id id llbuilder
     | Call (fname, params)  -> codegen_call fname params llbuilder
     | Noexpr                -> Llvm.build_add (Llvm.const_int i32_t 0) (Llvm.const_int i32_t 0) "nop" llbuilder
-    | _                     -> raise NotImplemented
 
 
 (* Binary Expression -> LLVM Value *)
@@ -162,6 +162,14 @@ and codegen_vardef (vname : string) (data_t : datatype) (expr : expr) (llbuilder
     end
   | false -> 
     raise (InvalidDefinitionType (vname, data_t, expr_t))
+
+
+and codegen_id (id : string) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  try Hashtbl.find named_parameters id
+  with Not_found ->
+    try let value = Hashtbl.find named_values id in
+      Llvm.build_load value id llbuilder
+    with Not_found -> raise (UndefinedId id)
 
 
 (*  *)
