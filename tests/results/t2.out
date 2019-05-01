@@ -1,1 +1,1 @@
-Error: File "tests/t2.in": Cannot perform binary operation of types int and float.
+Error: File "tests/t2.in": Cannot perform the operation "/" on type int -> float.

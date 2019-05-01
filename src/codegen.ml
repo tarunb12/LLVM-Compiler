@@ -57,6 +57,8 @@ and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
 
 (* Binary Expression -> LLVM Value *)
 and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  let e1_t : datatype = get_expr_type e2 in
+  let e2_t : datatype = get_expr_type e1 in
   let expr1 : Llvm.llvalue = codegen_expr llbuilder e1 in
   let expr2 : Llvm.llvalue = codegen_expr llbuilder e2 in
   
@@ -96,16 +98,15 @@ and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilde
     match data_t with
     | Int_t | Bool_t | Char_t -> int_ops op expr1 expr2
     | Float_t                 -> float_ops op expr1 expr2
-    | _                       -> raise BinaryOperationNotSupported in
+    | _                       -> raise (InvalidBinaryOperation (op, e1_t, e2_t)) in
 
-  let data_t : datatype = get_binop_type e1 e2 in
+  let data_t : datatype = get_binop_type op e1 e2 in
   type_handler data_t
 
 
 (* Unary Expression -> LLVM Value *)
 and handle_unop (op : unOp) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
   let expr_t : datatype = get_expr_type expr in
-  
   let expr : Llvm.llvalue = codegen_expr llbuilder expr in
 
   let un_ops (op : unOp) (expr : Llvm.llvalue) (data_t : datatype) : Llvm.llvalue =
@@ -118,14 +119,9 @@ and handle_unop (op : unOp) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.ll
   let type_handler (data_t : datatype) : Llvm.llvalue =
     match data_t with
     | Int_t | Float_t | Bool_t  -> un_ops op expr data_t
-    | _                         -> raise UnOpNotSupported in
+    | _                         -> raise (InvalidUnaryOperation (op, data_t)) in
 
-  let data_t : datatype =
-    match expr_t with
-    | Int_t | Float_t | Bool_t  -> expr_t
-    | _                         -> raise UnOpNotSupported in
-
-  type_handler data_t
+  type_handler expr_t
 
 
 (*  *)
