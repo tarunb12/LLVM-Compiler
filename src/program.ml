@@ -107,9 +107,13 @@ let error_program (error : string) : program =
 let add_period (str : string) : string = str ^ "." ;;
 
 let string_of_exception (filename : string) : exn -> string = function
-  | InvalidBinaryOperation (op, e1_t, e2_t) -> "Error: File \"" ^ filename ^ "\": Cannot perform the operation \"" ^ string_of_binop op ^ "\" on type " ^ string_of_datatype e1_t ^ " -> " ^ string_of_datatype e2_t
-  | InvalidUnaryOperation (op, e_t) -> "Error: File \"" ^ filename ^ "\": Cannot perform the operation \"" ^ string_of_unop op ^ "\" on type " ^ string_of_datatype e_t
-  | LLVMFunctionNotFound fname -> "Error: File \"" ^ filename ^ "\": Could not find any function with the name \"" ^ fname ^ "\""
   | SyntaxError (line, err) -> "Syntax error: File \"" ^ filename ^ "\", line " ^ string_of_int line ^ ": \"" ^ err ^ "\""
-  | UndefinedId id -> "Error: File \"" ^ filename ^ "\": \"" ^ id ^ "\" is not defined"
-  | _ -> "Error: File \"" ^ filename ^ "\"" ;;
+  | exn ->
+    "Error: File \"" ^ filename ^ "\": " ^
+    match exn with
+    | InvalidBinaryOperation (op, e1_t, e2_t) -> "Cannot perform the operation \"" ^ string_of_binop op ^ "\" on type " ^ string_of_datatype e1_t ^ " -> " ^ string_of_datatype e2_t
+    | InvalidDefinitionType (v, d_t, e_t) ->  "The specified type " ^ string_of_datatype d_t ^ " of the variable \"" ^ v ^ "\" does not match expression of type " ^ string_of_datatype e_t
+    | InvalidUnaryOperation (op, e_t) -> "Cannot perform the operation \"" ^ string_of_unop op ^ "\" on type " ^ string_of_datatype e_t
+    | LLVMFunctionNotFound fname -> "Could not find any function with the name \"" ^ fname ^ "\""
+    | UndefinedId id -> "\"" ^ id ^ "\" is not defined"
+    | _ -> "" ;;

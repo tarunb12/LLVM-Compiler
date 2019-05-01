@@ -1,0 +1,1 @@
+Error: File "tests/t02.in": Cannot perform the operation "/" on type int -> float.

@@ -10,7 +10,7 @@ exception FunctionWithoutBasicBlock of string
 exception IntOpNotSupported
 exception InvalidBinaryOperation of binOp * datatype * datatype
 exception InvalidDataType of string
-exception InvalidDefinitionType of string
+exception InvalidDefinitionType of string * datatype * datatype
 exception InvalidMainReturnType
 exception InvalidParameterType
 exception InvalidUnaryOperation of unOp * datatype

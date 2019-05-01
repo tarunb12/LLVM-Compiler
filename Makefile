@@ -71,6 +71,6 @@ $(OUT_WILD): $(EXE_WILD)
 	./$< > $@
 
 tests: $(MAIN_FILE) $(LLVM_FILES) $(EXE_FILES) $(OUT_FILES)
-	@echo "Done testing. Generated LLVM code in \"$(LLVM_DIR)*$(LLVM_EXT)\", Results in \"$(OUT_DIR)*$(OUT_EXT)\" dir."
+	@echo "Done testing. Generated LLVM code in \"$(LLVM_ALL)\", Results in \"$(OUT_ALL)\" dir."
 
 retest: clean tests

@@ -48,10 +48,12 @@ and codegen_expr (llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue =
     | IntLit int            -> Llvm.const_int i32_t int
     | BoolLit bool          -> if bool then Llvm.const_int i1_t 1 else Llvm.const_int i1_t 0
     | CharLit char          -> Llvm.const_int i8_t (int_of_char char)
+    | StringLit str         -> Llvm.build_global_stringptr str "tmp" llbuilder
     | BinOp (op, e1, e2)    -> handle_binop op e1 e2 llbuilder
     | UnOp (op, e)          -> handle_unop op e llbuilder
     | Assign (e1, e2)       -> codegen_assign e1 e2 llbuilder
     | Call (fname, params)  -> codegen_call fname params llbuilder
+    | Noexpr                -> Llvm.build_add (Llvm.const_int i32_t 0) (Llvm.const_int i32_t 0) "nop" llbuilder
     | _                     -> raise NotImplemented
 
 
@@ -92,7 +94,7 @@ and handle_binop (op : binOp) (e1 : expr) (e2 : expr) (llbuilder : Llvm.llbuilde
     | LEq     -> Llvm.build_fcmp Llvm.Fcmp.Ole expr1 expr2 "f_leqtmp" llbuilder
     | Greater -> Llvm.build_fcmp Llvm.Fcmp.Ogt expr1 expr2 "f_sgttmp" llbuilder
     | GEq     -> Llvm.build_fcmp Llvm.Fcmp.Oge expr1 expr2 "f_sgetmp" llbuilder
-    | _       -> raise FloatOpNotSupported in
+    | _       -> raise (InvalidBinaryOperation (op, e1_t, e2_t)) in
   
   let type_handler (data_t : datatype) : Llvm.llvalue =
     match data_t with
@@ -144,7 +146,7 @@ and codegen_assign (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.llbuilder) : 
 
 (* Variable definition -> LLVM Store Variable, Value *)
 and codegen_vardef (vname : string) (data_t : datatype) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
-  let expr_t = get_expr_type expr in
+  let expr_t : datatype = get_expr_type expr in
   match data_t = expr_t with
   | true ->
     begin
@@ -159,9 +161,7 @@ and codegen_vardef (vname : string) (data_t : datatype) (expr : expr) (llbuilder
       | _       -> codegen_assign lhs expr llbuilder
     end
   | false -> 
-    let data_t : string = string_of_datatype data_t in
-    let expr_t : string = string_of_datatype expr_t in
-    raise (InvalidDefinitionType ("The specified type " ^ data_t ^ " of the variable \"" ^ vname ^ "\" does not match expression of type " ^ expr_t))
+    raise (InvalidDefinitionType (vname, data_t, expr_t))
 
 
 (*  *)
