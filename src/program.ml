@@ -46,32 +46,32 @@ let rec get_expr_type : expr -> datatype = function
 and get_binop_type (op : binOp) (e1 : expr) (e2 : expr) : datatype =
   let e1_t : datatype = get_expr_type e1 in
   let e2_t : datatype = get_expr_type e2 in
-  let invalid_binary_operation = raise (InvalidBinaryOperation (op, e1_t, e2_t)) in
-  if e1_t <> e2_t then invalid_binary_operation
+  let invalid_binary_operation = InvalidBinaryOperation (op, e1_t, e2_t) in
+  if e1_t <> e2_t then raise invalid_binary_operation
   else
     match op with
     | Add | Sub | Mult | Div | Mod ->
       begin
         match e1_t with
         | Int_t | Float_t | Char_t -> e1_t
-        | _ -> invalid_binary_operation
+        | _ -> raise invalid_binary_operation
       end
     | And | Or | Xor ->
       begin
         match e1_t with
         | Bool_t -> e1_t
-        | _ -> invalid_binary_operation
+        | _ -> raise invalid_binary_operation
       end
     | Less | LEq | Greater | GEq ->
       begin
         match e1_t with
         | Int_t | Float_t | Char_t -> e1_t
-        | _ -> invalid_binary_operation
+        | _ -> raise invalid_binary_operation
       end
     | Eq | NEq ->
       begin
         match e1_t with
-        | Unit_t | String_t -> invalid_binary_operation
+        | Unit_t | String_t -> raise invalid_binary_operation
         | _ -> e1_t
       end
 
