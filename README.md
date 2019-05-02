@@ -69,6 +69,10 @@ If statements are structured as follows:
    else if (cond_2) {
       ...
    }
+   ...
+   else if (cond_n) {
+
+   }
    else {
       ...
    }
@@ -77,7 +81,21 @@ If statements are structured as follows:
    if (cond_1) ...
    else if (cond_2) ...
    ...
+   else if (cond_n) ...
    else ...
 ```
 
-Conditions in the if statement must evaluate to a bool type,
+Conditions in the if statement must evaluate to a bool type, or an error will be raised. Else blocks are NOT required
+for each of the if statements.
+
+#### For Statement
+
+For statements are structured as follows:
+
+```c
+int i
+int n ∈ [0, INT_MAX]
+for (i = 0; i < n; i++) {
+   ...
+}
+```
