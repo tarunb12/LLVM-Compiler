@@ -1,0 +1,4 @@
+int main() {
+    if (0 > 1) printf ("%d > %d", 0, 1)
+    else printf("%d < %d", 0, 1)
+}

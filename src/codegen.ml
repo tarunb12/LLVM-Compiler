@@ -17,6 +17,15 @@ let str_t       : Llvm.lltype     = Llvm.pointer_type (Llvm.i8_type context) ;;
 let named_values      : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 let named_parameters  : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 
+let types : (datatype * Llvm.lltype) list = [
+  Int_t, i32_t;
+  Float_t, float_t;
+  Bool_t, i1_t;
+  Char_t, i8_t;
+  String_t, str_t;
+  Unit_t, void_t;
+] ;;
+
 (* Function Name -> LLVM Function *)
 let llvm_lookup_function (fname : string) : Llvm.llvalue =
   match Llvm.lookup_function fname the_module with
@@ -24,13 +33,14 @@ let llvm_lookup_function (fname : string) : Llvm.llvalue =
   | Some f  -> f ;;
 
 (* Data Type -> LLVM Type *)
-let get_lltype : datatype -> Llvm.lltype = function
-  | Int_t     -> i32_t
-  | Float_t   -> float_t
-  | Bool_t    -> i1_t
-  | Char_t    -> i8_t
-  | String_t  -> str_t
-  | Unit_t    -> void_t ;;
+let lltype_of_datatype (d_type : datatype) : Llvm.lltype =
+  try snd (List.find (fun t -> d_type = fst t) types)
+  with Not_found -> void_t ;;
+
+(* LLVM Type -> Data Type *)
+let datatype_of_lltype (lltype : Llvm.lltype) : datatype =
+  try fst (List.find (fun t -> lltype = snd t) types)
+  with Not_found -> Unit_t ;;
 
 (* Statement -> LLVM Statement Execution *)
 let rec codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
@@ -152,7 +162,7 @@ and codegen_vardef (vname : string) (data_t : datatype) (expr : expr) (llbuilder
   match data_t = expr_t with
   | true ->
     begin
-      let lltype : Llvm.lltype = get_lltype data_t in
+      let lltype : Llvm.lltype = lltype_of_datatype data_t in
       let malloc : Llvm.llvalue = Llvm.build_malloc lltype vname llbuilder in
 
       Hashtbl.add named_values vname malloc;
@@ -247,7 +257,7 @@ let init_params (f : Llvm.llvalue) (args : statement list) : unit =
     let named_param =
       match param with
       | VarDec (_, name)  -> name
-      | _                 -> raise InvalidParameterType in
+      | _                 -> raise (InvalidParameterType param) in
     Llvm.set_value_name named_param element;
     Hashtbl.add named_parameters named_param element;
   ) (Llvm.params f) ;;
@@ -279,6 +289,11 @@ let codegen_main (stmts : statement list) (d_type : datatype) : unit =
         | Llvm.After block  -> block
         | _ -> raise (FunctionWithoutBasicBlock "main") in
 
+      let return_t : Llvm.lltype = Llvm.return_type (Llvm.type_of (llvm_lookup_function "main")) in
+      if datatype_of_lltype return_t <> datatype_of_lltype i32_t then
+        if datatype_of_lltype return_t <> datatype_of_lltype void_t then
+          raise (InvalidMainReturnType (datatype_of_lltype return_t));
+
       match Llvm.instr_end last_basic_block with
       | Llvm.After instr ->
         let op = Llvm.instr_opcode instr in
@@ -308,7 +323,7 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
       | Llvm.After block  -> block
       | Llvm.At_start _   -> raise (FunctionWithoutBasicBlock fname) in
 
-    let return_t = Llvm.return_type (Llvm.type_of (llvm_lookup_function fname)) in
+    let return_t : Llvm.lltype = Llvm.return_type (Llvm.type_of (llvm_lookup_function fname)) in
 
     match Llvm.instr_end last_basic_block with
     | Llvm.After instr ->
