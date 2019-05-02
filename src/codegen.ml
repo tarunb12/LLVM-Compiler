@@ -50,7 +50,7 @@ let datatype_of_lltype (lltype : Llvm.lltype) : datatype =
 
 (* Statement -> LLVM Statement Execution *)
 let rec codegen_stmt ~(llbuilder : Llvm.llbuilder) : statement -> Llvm.llvalue = function
-  | Block stmt_list               -> List.hd (List.map (fun stmt -> codegen_stmt stmt ~llbuilder) stmt_list)
+  | Block stmt_list               -> begin try List.hd (List.map (fun stmt -> codegen_stmt stmt ~llbuilder) stmt_list) with Failure _ -> Llvm.const_null i1_t end
   | If (cond, t_stmt, f_stmt)     -> codegen_if cond t_stmt f_stmt ~llbuilder
   | For (init, cond, incr, stmt)  -> codegen_for init cond incr stmt ~llbuilder
   | Expr expr                     -> codegen_expr expr ~llbuilder

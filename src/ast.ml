@@ -32,7 +32,6 @@ type statement =
     | Expr      of expr
     | Return    of expr
     | VarDef    of datatype * string * expr
-    | VarRedef  of string * expr
     | FuncDef   of datatype * string * statement list * statement list
     | If        of expr * statement * statement
     | For       of expr * expr * expr * statement

@@ -1,1 +1,2 @@
-Error: File "tests/t04.in": Parser.MenhirBasics.Error.
+1 < 2
+(else if block)

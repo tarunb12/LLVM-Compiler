@@ -3,12 +3,12 @@
     open Ast ;;
 %}
 
-%token TYPE_INT TYPE_FLOAT TYPE_BOOL TYPE_CHAR TYPE_STRING TYPE_UNIT
-%token ASSIGN LT LTE GT GTE EQ NEQ
 %token LPAR RPAR LBRACE RBRACE COMMA SEMI
-%token PLUS MINUS MUL DIV MOD AND OR XOR NOT
+%token PLUS MINUS MUL DIV ASSIGN NOT MOD XOR
 %token INCREMENT DECREMENT
+%token EQ NEQ LT LTE GT GTE AND OR
 %token IF ELSE FOR WHILE BREAK CONTINUE RETURN
+%token TYPE_INT TYPE_FLOAT TYPE_BOOL TYPE_CHAR TYPE_STRING TYPE_UNIT
 %token EOF
 
 %token <int> INT
@@ -25,7 +25,7 @@
 %left EQ NEQ
 %left LT GT LTE GTE
 %left PLUS MINUS
-%left MUL DIV
+%left MUL DIV MOD
 %right NOT NEG
 %left INCREMENT DECREMENT
 
@@ -73,7 +73,6 @@ opt_expr:                                       { Noexpr }
 var_definition:
     | exprType ID ASSIGN expr                   { VarDef($1, $2, $4) }
     | exprType ID                               { VarDef($1, $2, Noexpr) }
-    | ID ASSIGN expr                            { VarRedef($1, $3) }
     ;
 
 func_definition:

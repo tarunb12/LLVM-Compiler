@@ -34,7 +34,6 @@ let rec string_of_stmt (indent : int) : statement -> string =
   | Expr expr -> string_of_expr expr
   | Return expr -> "return " ^ string_of_expr expr
   | VarDef (d_type, vname, expr) -> string_of_datatype d_type ^ " " ^ vname ^ begin match expr with Noexpr -> "" | _ -> " = " ^ string_of_expr expr end
-  | VarRedef (vname, expr) -> vname ^ " = " ^ string_of_expr expr
   | FuncDef (d_type, fname, params, stmts) -> string_of_datatype d_type ^ " " ^ fname ^ "(" ^ String.concat ", " (List.map (string_of_stmt indent) params) ^ ") " ^ string_of_stmt indent (Block stmts)
   | If (cond, t_block, f_block) -> "if (" ^ string_of_expr cond ^ ") " ^ string_of_stmt (indent + 1) (t_block) ^ if f_block <> Block([]) then " else " ^ string_of_stmt indent f_block else ""
   | For (v_assign, cond, v_reassign, block) -> "for (" ^ string_of_expr v_assign ^ "; " ^ string_of_expr cond ^ "; " ^ string_of_expr v_reassign ^ string_of_stmt indent block

@@ -5,7 +5,6 @@ open Exceptions ;;
 (* Functions to get information about / manipulate the AST *)
 
 let binop_type_of_types (op : binOp) (e1_t : datatype) (e2_t : datatype) : datatype =
-
   let invalid_binary_operation = InvalidBinaryOperation (op, e1_t, e2_t) in
   if e1_t <> e2_t then raise invalid_binary_operation
   else
@@ -44,9 +43,9 @@ let rec get_expr_type : expr -> datatype = function
   | StringLit _         -> String_t
   | BinOp (op, e1, e2)  -> get_binop_type op e1 e2
   | UnOp (op, e1)       -> get_unop_type op e1
-  | Id id               -> Unit_t
-  | Assign (e1, e2)     -> Unit_t
-  | Call (f, params)    -> Unit_t
+  | Id _                -> Unit_t
+  | Assign _            -> Unit_t
+  | Call _              -> Unit_t
   | Noexpr              -> Unit_t
 
 (* Get the type of a binary operation *)
