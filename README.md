@@ -56,9 +56,7 @@ of these types are stored as integers. Floats cannot perform certain operations,
 To print values, the printf function is built into this language, and is very similar to that of c. For example,  
 `printf("%d + %d = %d", 1, 2, 1 + 2)` will produce `1 + 2 = 3` in the output file. Expressions are NOT automatically printed when they are evaluated, so expressions will need to go through the printf call to be shown in the output file.
 
-### Statements
-
-#### If Statement
+### If Statement
 
 If statements are structured as follows:
 
@@ -88,7 +86,7 @@ If statements are structured as follows:
 Conditions in the if statement must evaluate to a bool type. Else blocks are NOT required
 for each of the if statements.
 
-#### For Statement
+### For Statement
 
 For statements are structured as follows:
 
@@ -101,7 +99,7 @@ for (i = 0; cond; i++) {
 
 The condition (second part of the for loop) must evaluate to a bool type.
 
-#### While Statement
+### While Statement
 
 While statements are structured as follows:
 
