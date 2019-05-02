@@ -4,21 +4,8 @@ open Exceptions ;;
 
 (* Functions to get information about / manipulate the AST *)
 
-(* Get expression type *)
-let rec get_expr_type : expr -> datatype = function
-  | IntLit _            -> Int_t
-  | FloatLit _          -> Float_t
-  | BoolLit _           -> Bool_t
-  | CharLit _           -> Char_t
-  | StringLit _         -> String_t
-  | BinOp (op, e1, e2)  -> get_binop_type op e1 e2
-  | UnOp (op, e1)       -> get_expr_type e1
-  | _                   -> Unit_t
+let binop_type_of_types (op : binOp) (e1_t : datatype) (e2_t : datatype) : datatype =
 
-(* Get the type of a binary operation *)
-and get_binop_type (op : binOp) (e1 : expr) (e2 : expr) : datatype =
-  let e1_t : datatype = get_expr_type e1 in
-  let e2_t : datatype = get_expr_type e2 in
   let invalid_binary_operation = InvalidBinaryOperation (op, e1_t, e2_t) in
   if e1_t <> e2_t then raise invalid_binary_operation
   else
@@ -48,22 +35,43 @@ and get_binop_type (op : binOp) (e1 : expr) (e2 : expr) : datatype =
         | _ -> e1_t
       end
 
+(* Get expression type *)
+let rec get_expr_type : expr -> datatype = function
+  | IntLit _            -> Int_t
+  | FloatLit _          -> Float_t
+  | BoolLit _           -> Bool_t
+  | CharLit _           -> Char_t
+  | StringLit _         -> String_t
+  | BinOp (op, e1, e2)  -> get_binop_type op e1 e2
+  | UnOp (op, e1)       -> get_unop_type op e1
+  | Id id               -> Unit_t
+  | Assign (e1, e2)     -> Unit_t
+  | Call (f, params)    -> Unit_t
+  | Noexpr              -> Unit_t
+
+(* Get the type of a binary operation *)
+and get_binop_type (op : binOp) (e1 : expr) (e2 : expr) : datatype =
+  let e1_t : datatype = get_expr_type e1 in
+  let e2_t : datatype = get_expr_type e2 in
+  binop_type_of_types op e1_t e2_t
+
 and get_unop_type (op : unOp) (e : expr) : datatype =
   let e_t = get_expr_type e in
-  let invalid_unary_operation = raise (InvalidUnaryOperation (op, e_t)) in
+  let invalid_unary_operation = InvalidUnaryOperation (op, e_t) in
   match op with
   | Neg ->
     begin
       match e_t with
       | Float_t | Int_t -> e_t
-      | _ -> invalid_unary_operation
+      | _ -> raise invalid_unary_operation
     end
   | Not ->
     begin
       match e_t with
       | Bool_t -> e_t
-      | _ -> invalid_unary_operation
+      | _ -> raise invalid_unary_operation
     end ;;
+
 
 (* Default error program, which is a call to print an error (this also generates LLVM) *)
 let error_program (error : string) : program = 
@@ -91,8 +99,8 @@ let string_of_exception (filename : string) : exn -> string = function
     | InvalidMainReturnType d_type -> "Invalid return type of \"" ^ string_of_datatype d_type ^ "\" for main method, expected \"int\""
     | InvalidParameterType fname -> "Invalid parameter declaration in the function \"" ^ fname ^ "\""
     | InvalidUnaryOperation (op, e_t) -> "Cannot perform the operation \"" ^ string_of_unop op ^ "\" on type " ^ string_of_datatype e_t
-    | LeftHandSideUnassignable expr -> ""
+    | LeftHandSideUnassignable expr -> "Cannot assign a value to the left hand side of the expression: " ^ string_of_expr expr
     | LLVMFunctionNotFound fname -> "Could not find any function with the name \"" ^ fname ^ "\""
     | NotImplemented -> "Not implemented"
     | UndefinedId id -> "\"" ^ id ^ "\" is not defined"
-    | _ -> "Unknown" ;;
+    | _ -> Printexc.to_string exn ^ Printexc.get_backtrace () ;;

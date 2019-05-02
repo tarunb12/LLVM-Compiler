@@ -70,12 +70,9 @@ opt_expr:                                       { Noexpr }
     | expr                                      { $1 }
     ;
 
-var_declaration:
-    | exprType ID                               { VarDec($1, $2) }
-    ;
-
 var_definition:
     | exprType ID ASSIGN expr                   { VarDef($1, $2, $4) }
+    | exprType ID                               { VarDef($1, $2, Noexpr) }
     | ID ASSIGN expr                            { VarRedef($1, $3) }
     ;
 
@@ -85,8 +82,8 @@ func_definition:
     ;
 
 func_declaration_args: (* Empty list *)         { [] }
-    | var_declaration                           { [$1] }
-    | func_declaration_args COMMA var_declaration
+    | var_definition                           { [$1] }
+    | func_declaration_args COMMA var_definition
         { rev ($3 :: $1) }
     ;
 
@@ -138,5 +135,6 @@ atom:
     | FLOAT                                     { FloatLit($1) }
     | CHAR                                      { CharLit($1) }
     | BOOL                                      { BoolLit($1) }
-    | STRING                                    { StringLit($1) }                    
+    | STRING                                    { StringLit($1) }      
+    | ID                                        { Id($1) }              
     ;    

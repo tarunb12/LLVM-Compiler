@@ -28,20 +28,17 @@ let string_of_datatype : datatype -> string = function
   | String_t  -> "string"
   | Unit_t    -> "unit" ;;
 
-let rec string_of_program : program -> string = function
-  | Program stmts -> String.concat "\n\n" (List.map string_of_stmt stmts)
-
-and string_of_stmt : statement -> string = function
-  | Block stmts -> "{\n" ^ String.concat "\n" (List.map (fun str -> "\t" ^ str) (List.map string_of_stmt stmts)) ^ "\n}\n"
+let rec string_of_stmt (indent : int) : statement -> string = 
+  let indent_string (indent : int) : string = String.make indent '\t' in function
+  | Block stmts -> "{\n" ^ String.concat "\n" (List.map (fun str -> (indent_string indent) ^ str) (List.map (string_of_stmt (indent + 1)) stmts)) ^ "\n}\n"
   | Expr expr -> string_of_expr expr
   | Return expr -> "return " ^ string_of_expr expr
-  | VarDef (d_type, vname, expr) -> string_of_datatype d_type ^ " " ^ vname ^ " = " ^ string_of_expr expr
+  | VarDef (d_type, vname, expr) -> string_of_datatype d_type ^ " " ^ vname ^ begin match expr with Noexpr -> "" | _ -> " = " ^ string_of_expr expr end
   | VarRedef (vname, expr) -> vname ^ " = " ^ string_of_expr expr
-  | FuncDef (d_type, fname, params, stmts) -> string_of_datatype d_type ^ " " ^ fname ^ "(" ^ String.concat ", " (List.map string_of_stmt params) ^ ") " ^ string_of_stmt (Block stmts)
-  | VarDec (d_type, vname) -> string_of_datatype d_type ^ " " ^ vname
-  | If (cond, t_block, f_block) -> "if (" ^ string_of_expr cond ^ ") " ^ string_of_stmt (t_block) ^ if f_block <> Block([]) then " else " ^ string_of_stmt f_block else ""
-  | For (v_assign, cond, v_reassign, block) -> "for (" ^ string_of_expr v_assign ^ "; " ^ string_of_expr cond ^ "; " ^ string_of_expr v_reassign ^ string_of_stmt block
-  | While (cond, block) -> "while (" ^ string_of_expr cond ^ ")" ^ string_of_stmt block
+  | FuncDef (d_type, fname, params, stmts) -> string_of_datatype d_type ^ " " ^ fname ^ "(" ^ String.concat ", " (List.map (string_of_stmt indent) params) ^ ") " ^ string_of_stmt indent (Block stmts)
+  | If (cond, t_block, f_block) -> "if (" ^ string_of_expr cond ^ ") " ^ string_of_stmt (indent + 1) (t_block) ^ if f_block <> Block([]) then " else " ^ string_of_stmt indent f_block else ""
+  | For (v_assign, cond, v_reassign, block) -> "for (" ^ string_of_expr v_assign ^ "; " ^ string_of_expr cond ^ "; " ^ string_of_expr v_reassign ^ string_of_stmt indent block
+  | While (cond, block) -> "while (" ^ string_of_expr cond ^ ")" ^ string_of_stmt (indent + 1) block
   | Break -> "break"
   | Continue -> "continue"
 
@@ -61,4 +58,7 @@ and string_of_expr : expr -> string = function
     match expr_list with
     | [] -> ")"
     | hd :: [] -> string_of_expr hd ^ ")"
-    | hd :: tl -> string_of_expr hd ^ ", " ^ String.concat ", " (List.map string_of_expr tl) ^ ")"
+    | hd :: tl -> string_of_expr hd ^ ", " ^ String.concat ", " (List.map string_of_expr tl) ^ ")" ;;
+
+let string_of_program : program -> string = function
+  | Program stmts -> String.concat "\n\n" (List.map (string_of_stmt 0) stmts) ;;
