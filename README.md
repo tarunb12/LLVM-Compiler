@@ -27,7 +27,7 @@ in the llvm, executables, and results folder respectively within tests.
 
 If there are any errors within the tests, I have for the most part checked for those errors, and custom error messages
 with more information on the error is output into the file, rather than producing a compiler error (so that the rest
-of the test are still able to be compiled).
+of the test are still able to be compiled). This is done by making a custom AST which simply calls `printf` with the error message (so it is still ran through LLVM).
 
 Each file must have a main method as the entry point to the program (which LLVM requires). The main method should look as follows:
 
@@ -52,6 +52,8 @@ where type can be one of "int", "float", "bool", "char", or "string", and 'n' is
 encoded as 1-bit integers, characters as 8-bit integers, and Integers as 32-bit integers. Floats are 32-bit floating
 point types, and strings are 8-bit integer pointers. When performing binary operations on these types (excluding string), both expressions being operated on should have the same type, or an error will be thrown, even though many
 of these types are stored as integers. Floats cannot perform certain operations, such as and, or, and xor.
+
+Please note that for function calls to work, the function must be defined before the function call.
 
 To print values, the printf function is built into this language, and is very similar to that of c. For example,  
 `printf("%d + %d = %d", 1, 2, 1 + 2)` will produce `1 + 2 = 3` in the output file. Expressions are NOT automatically printed when they are evaluated, so expressions will need to go through the printf call to be shown in the output file.
