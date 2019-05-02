@@ -250,14 +250,14 @@ and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
   let llargs : Llvm.llvalue array = Array.of_list (format_llstr :: format_llargs) in
   Llvm.build_call func_llvalue llargs "printf" llbuilder ;;
 
-let init_params (f : Llvm.llvalue) (args : statement list) : unit =
+let init_params (f : Llvm.llvalue) (args : statement list) (fname : string) : unit =
   let args = Array.of_list args in
   Array.iteri (fun i element ->
     let param = args.(i) in
     let named_param =
       match param with
       | VarDec (_, name)  -> name
-      | _                 -> raise (InvalidParameterType param) in
+      | _                 -> raise (InvalidParameterType fname) in
     Llvm.set_value_name named_param element;
     Hashtbl.add named_parameters named_param element;
   ) (Llvm.params f) ;;
@@ -315,7 +315,7 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
     let f : Llvm.llvalue = llvm_lookup_function fname in
     let llbuilder : Llvm.llbuilder = Llvm.builder_at_end context (Llvm.entry_block f) in
 
-    let () = init_params f params in
+    let () = init_params f params fname in
     let _ : Llvm.llvalue = codegen_stmt (Block (stmts)) llbuilder in
 
     let last_basic_block =

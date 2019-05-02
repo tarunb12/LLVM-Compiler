@@ -7,7 +7,7 @@ exception SyntaxError of int * string
 exception InvalidBinaryOperation of binOp * datatype * datatype
 exception InvalidDefinitionType of string * datatype * datatype
 exception InvalidMainReturnType of datatype
-exception InvalidParameterType of statement
+exception InvalidParameterType of string
 exception InvalidUnaryOperation of unOp * datatype
 
 (* Code generation exceptions *)

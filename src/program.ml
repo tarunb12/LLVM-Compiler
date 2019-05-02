@@ -1,35 +1,8 @@
 open Ast ;;
+open Utils ;;
 open Exceptions ;;
 
 (* Functions to get information about / manipulate the AST *)
-
-let string_of_binop : binOp -> string = function
-  | Add     -> "+"
-  | Sub     -> "-"
-  | Mult    -> "*"
-  | Div     -> "/"
-  | Mod     -> "%"
-  | And     -> "&&"
-  | Or      -> "||"
-  | Xor     -> "^"
-  | Eq      -> "=="
-  | NEq     -> "!="
-  | Less    -> "<"
-  | LEq     -> "<="
-  | Greater -> ">"
-  | GEq     -> ">=" ;;
-
-let string_of_unop : unOp -> string = function
-  | Neg -> "-"
-  | Not -> "!" ;;
-
-let string_of_datatype : datatype -> string = function
-  | Int_t     -> "int"
-  | Float_t   -> "float"
-  | Bool_t    -> "bool"
-  | Char_t    -> "char"
-  | String_t  -> "string"
-  | Unit_t    -> "unit" ;;
 
 (* Get expression type *)
 let rec get_expr_type : expr -> datatype = function
@@ -111,11 +84,15 @@ let string_of_exception (filename : string) : exn -> string = function
   | exn ->
     "Error: File \"" ^ filename ^ "\": " ^
     match exn with
+    | FirstPrintArgumentNotString expr -> "Invalid first argument for printf: " ^ string_of_expr expr
+    | FunctionWithoutBasicBlock fname -> "The function \"" ^ fname ^ "\" is empty"
     | InvalidBinaryOperation (op, e1_t, e2_t) -> "Cannot perform the operation \"" ^ string_of_binop op ^ "\" on type " ^ string_of_datatype e1_t ^ " -> " ^ string_of_datatype e2_t
     | InvalidDefinitionType (v, d_t, e_t) ->  "The specified type " ^ string_of_datatype d_t ^ " of the variable \"" ^ v ^ "\" does not match expression of type " ^ string_of_datatype e_t
     | InvalidMainReturnType d_type -> "Invalid return type of \"" ^ string_of_datatype d_type ^ "\" for main method, expected \"int\""
+    | InvalidParameterType fname -> "Invalid parameter declaration in the function \"" ^ fname ^ "\""
     | InvalidUnaryOperation (op, e_t) -> "Cannot perform the operation \"" ^ string_of_unop op ^ "\" on type " ^ string_of_datatype e_t
+    | LeftHandSideUnassignable expr -> ""
     | LLVMFunctionNotFound fname -> "Could not find any function with the name \"" ^ fname ^ "\""
     | NotImplemented -> "Not implemented"
     | UndefinedId id -> "\"" ^ id ^ "\" is not defined"
-    | _ -> "" ;;
+    | _ -> "Unknown" ;;
