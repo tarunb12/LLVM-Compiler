@@ -1,6 +1,9 @@
 int main() {
+    int max = 5
     int i
-    for (i = 0; i < 5; i++) {
-        printf("%d steps\n", i)
+    for (i = 0; i <= max; i++) {
+        if (i < max) printf("%d steps\n", i)
+        else printf ("%dth and final step", i)
     }
+    return 0
 }

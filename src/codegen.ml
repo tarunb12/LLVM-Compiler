@@ -184,32 +184,38 @@ and codegen_id ~(llbuilder : Llvm.llbuilder) (id : string) : Llvm.llvalue =
 (* If Statement -> LLVM If *)
 and codegen_if ~(llbuilder : Llvm.llbuilder) (cond : expr) (t_stmt : statement) (f_stmt : statement) : Llvm.llvalue =
   let cond_eval : Llvm.llvalue = codegen_expr cond ~llbuilder in
-  let start_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
-  let func : Llvm.llvalue = Llvm.block_parent start_bb in
+  let cond_t : datatype = datatype_of_lltype (Llvm.type_of cond_eval) in
+  match cond_t with
+  | Bool_t ->
+    begin
+      let start_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
+      let func : Llvm.llvalue = Llvm.block_parent start_bb in
 
-  let if_bb : Llvm.llbasicblock = Llvm.append_block context "if" func in
-  Llvm.position_at_end if_bb llbuilder;
+      let if_bb : Llvm.llbasicblock = Llvm.append_block context "if" func in
+      Llvm.position_at_end if_bb llbuilder;
 
-  let _ : Llvm.llvalue = codegen_stmt t_stmt ~llbuilder in
-  let new_if_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
+      let _ : Llvm.llvalue = codegen_stmt t_stmt ~llbuilder in
+      let new_if_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
 
-  let else_bb : Llvm.llbasicblock = Llvm.append_block context "else" func in
-  Llvm.position_at_end else_bb llbuilder;
+      let else_bb : Llvm.llbasicblock = Llvm.append_block context "else" func in
+      Llvm.position_at_end else_bb llbuilder;
 
-  let _ : Llvm.llvalue = codegen_stmt f_stmt ~llbuilder in
-  let new_else_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
+      let _ : Llvm.llvalue = codegen_stmt f_stmt ~llbuilder in
+      let new_else_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
 
-  let merge_bb : Llvm.llbasicblock = Llvm.append_block context "ifcont" func in
-  Llvm.position_at_end merge_bb llbuilder;
+      let merge_bb : Llvm.llbasicblock = Llvm.append_block context "ifcont" func in
+      Llvm.position_at_end merge_bb llbuilder;
 
-  let else_bb_val : Llvm.llvalue = Llvm.value_of_block new_else_bb in
-  Llvm.position_at_end start_bb llbuilder;
+      let else_bb_val : Llvm.llvalue = Llvm.value_of_block new_else_bb in
+      Llvm.position_at_end start_bb llbuilder;
 
-  ignore (Llvm.build_cond_br cond_eval if_bb else_bb llbuilder);
-  Llvm.position_at_end new_if_bb llbuilder; ignore (Llvm.build_br merge_bb llbuilder);
-  Llvm.position_at_end new_else_bb llbuilder; ignore (Llvm.build_br merge_bb llbuilder);
-  Llvm.position_at_end merge_bb llbuilder;
-  else_bb_val
+      ignore (Llvm.build_cond_br cond_eval if_bb else_bb llbuilder);
+      Llvm.position_at_end new_if_bb llbuilder; ignore (Llvm.build_br merge_bb llbuilder);
+      Llvm.position_at_end new_else_bb llbuilder; ignore (Llvm.build_br merge_bb llbuilder);
+      Llvm.position_at_end merge_bb llbuilder;
+      else_bb_val
+    end
+  | _ -> raise (InvalidConditionType cond_t)
 
 (* For Statement -> LLVM Loop *)
 and codegen_for ~(llbuilder : Llvm.llbuilder) (init : expr) (cond : expr) (incr : expr) (stmt : statement) : Llvm.llvalue =

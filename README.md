@@ -25,6 +25,10 @@ in the llvm, executables, and results folder respectively within tests.
 
 ### Syntax/Structure
 
+If there are any errors within the tests, I have for the most part checked for those errors, and custom error messages
+with more information on the error is output into the file, rather than producing a compiler error (so that the rest
+of the test are still able to be compiled).
+
 Each file must have a main method as the entry point to the program (which LLVM requires). The main method should look as follows:
 
 ```c
@@ -35,7 +39,9 @@ int main() {
 
 By default, main will return the 32-bit integer 0, so the return type is optional.
 
-In general, methods will be structured as follows:
+### Functions
+
+In general, functions will be structured as follows:
 ```c
 type fname(arg1, arg2, ..., argn) {
    ...
@@ -45,7 +51,33 @@ type fname(arg1, arg2, ..., argn) {
 where type can be one of "int", "float", "bool", "char", or "string", and 'n' is of the same type. Booleans are
 encoded as 1-bit integers, characters as 8-bit integers, and Integers as 32-bit integers. Floats are 32-bit floating
 point types, and strings are 8-bit integer pointers. When performing binary operations on these types (excluding string), both expressions being operated on should have the same type, or an error will be thrown, even though many
-of these types are stored as integers. Floats cannot perform
+of these types are stored as integers. Floats cannot perform certain operations, such as and, or, and xor.
 
 To print values, the printf function is built into this language, and is very similar to that of c. For example,  
 `printf("%d + %d = %d", 1, 2, 1 + 2)` will produce `1 + 2 = 3` in the output file. Expressions are NOT automatically printed when they are evaluated, so expressions will need to go through the printf call to be shown in the output file.
+
+### Statements
+
+#### If Statement
+
+If statements are structured as follows:
+
+```c
+   if (cond_1) {
+      ...
+   }
+   else if (cond_2) {
+      ...
+   }
+   else {
+      ...
+   }
+
+   // Also valid:
+   if (cond_1) ...
+   else if (cond_2) ...
+   ...
+   else ...
+```
+
+Conditions in the if statement must evaluate to a bool type,

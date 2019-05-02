@@ -5,6 +5,7 @@ exception SyntaxError of int * string
 
 (* Type exceptions *)
 exception InvalidBinaryOperation of binOp * datatype * datatype
+exception InvalidConditionType of datatype
 exception InvalidDefinitionType of string * datatype * datatype
 exception InvalidMainReturnType of datatype
 exception InvalidParameterType of string
