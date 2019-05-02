@@ -85,7 +85,7 @@ If statements are structured as follows:
    else ...
 ```
 
-Conditions in the if statement must evaluate to a bool type, or an error will be raised. Else blocks are NOT required
+Conditions in the if statement must evaluate to a bool type. Else blocks are NOT required
 for each of the if statements.
 
 #### For Statement
@@ -93,9 +93,23 @@ for each of the if statements.
 For statements are structured as follows:
 
 ```c
-int i
-int n ∈ [0, INT_MAX]
-for (i = 0; i < n; i++) {
+<int|float> i
+for (i = 0; cond; i++) {
    ...
 }
 ```
+
+The condition (second part of the for loop) must evaluate to a bool type.
+
+#### While Statement
+
+While statements are structured as follows:
+
+```c
+while (cond) {
+   ...
+}
+```
+
+The condition must evaluate to a bool type. While statements are implemented as for loops, but with the first and third
+parts of the for loop as null (leaving only the condition).
