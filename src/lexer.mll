@@ -49,6 +49,8 @@ rule token = parse
   | '='                 { ASSIGN }
 
   (* Math Operators *)
+  | "++"                { INCREMENT }
+  | "--"                { DECREMENT }
   | '+'                 { PLUS }
   | '-'                 { MINUS }
   | '*'                 { MUL }

@@ -113,7 +113,9 @@ let string_of_exception (filename : string) : exn -> string = function
     match exn with
     | InvalidBinaryOperation (op, e1_t, e2_t) -> "Cannot perform the operation \"" ^ string_of_binop op ^ "\" on type " ^ string_of_datatype e1_t ^ " -> " ^ string_of_datatype e2_t
     | InvalidDefinitionType (v, d_t, e_t) ->  "The specified type " ^ string_of_datatype d_t ^ " of the variable \"" ^ v ^ "\" does not match expression of type " ^ string_of_datatype e_t
+    | InvalidMainReturnType d_type -> "Invalid return type of \"" ^ string_of_datatype d_type ^ "\" for main method, expected \"int\""
     | InvalidUnaryOperation (op, e_t) -> "Cannot perform the operation \"" ^ string_of_unop op ^ "\" on type " ^ string_of_datatype e_t
     | LLVMFunctionNotFound fname -> "Could not find any function with the name \"" ^ fname ^ "\""
+    | NotImplemented -> "Not implemented"
     | UndefinedId id -> "\"" ^ id ^ "\" is not defined"
     | _ -> "" ;;

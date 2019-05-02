@@ -1,4 +1,1 @@
-5 * (6 + 7) = 65
-(5 * 6) + 7 = 37
-5 * 6 + 7 = 37
-ok
+Error: File "tests/t03.in": Invalid return type of "bool" for main method, expected "int".

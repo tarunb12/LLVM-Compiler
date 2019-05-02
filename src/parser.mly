@@ -7,6 +7,7 @@
 %token ASSIGN LT LTE GT GTE EQ NEQ
 %token LPAR RPAR LBRACE RBRACE COMMA SEMI
 %token PLUS MINUS MUL DIV MOD AND OR XOR NOT
+%token INCREMENT DECREMENT
 %token IF ELSE FOR WHILE BREAK CONTINUE RETURN
 %token EOF
 
@@ -19,12 +20,14 @@
 
 %nonassoc NOELSE
 %nonassoc ELSE
+%right ASSIGN
 %left AND OR
 %left EQ NEQ
 %left LT GT LTE GTE
 %left PLUS MINUS
 %left MUL DIV
 %right NOT NEG
+%left INCREMENT DECREMENT
 
 %type <Ast.program> program
 %start program
@@ -98,6 +101,8 @@ expr_list:
 
 expr:
     | atom                                      { $1 }
+    | expr INCREMENT                            { BinOp(Add, $1, IntLit(1)) }
+    | expr DECREMENT                            { BinOp(Sub, $1, IntLit(1)) }
     | expr PLUS     expr                        { BinOp(Add, $1, $3) }
     | expr MINUS    expr                        { BinOp(Sub, $1, $3) }
     | expr MUL      expr                        { BinOp(Mult, $1, $3) }

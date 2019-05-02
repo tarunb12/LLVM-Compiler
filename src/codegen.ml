@@ -37,7 +37,9 @@ let rec codegen_stmt (stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llva
   match stmt with
   | Block stmt_list                         -> List.hd (List.map (fun stmt -> codegen_stmt stmt llbuilder) stmt_list)
   | Expr expr                               -> codegen_expr llbuilder expr
-  | VarDef (data_t, vname, e)               -> codegen_vardef vname data_t e llbuilder
+  | VarDef (d_type, vname, e)               -> codegen_vardef vname d_type e llbuilder
+  | Return expr                             -> codegen_return expr llbuilder
+  | If (cond, t_stmt, f_stmt)               -> codegen_if cond t_stmt f_stmt llbuilder
   | _                                       -> raise NotImplemented
 
 
@@ -116,7 +118,7 @@ and handle_unop (op : unOp) (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.ll
     | Neg, Int_t    -> Llvm.build_neg expr "i_unoptmp" llbuilder
     | Neg, Float_t  -> Llvm.build_fneg expr "f_unoptmp" llbuilder
     | Not, Bool_t   -> Llvm.build_not expr "b_unoptmp" llbuilder
-    | _             -> raise InvalidUnOpType in
+    | _             -> raise (InvalidUnaryOperation (op, expr_t)) in
 
   let type_handler (data_t : datatype) : Llvm.llvalue =
     match data_t with
@@ -138,7 +140,7 @@ and codegen_assign (expr1 : expr) (expr2 : expr) (llbuilder : Llvm.llbuilder) : 
           try Hashtbl.find named_values id
           with Not_found -> raise (UndefinedId id)
       end
-    | _ -> raise LeftHandSideUnassignable in
+    | _ -> raise (LeftHandSideUnassignable expr1) in
 
   ignore (Llvm.build_store rhs lhs llbuilder);
   rhs
@@ -172,8 +174,43 @@ and codegen_id (id : string) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
     with Not_found -> raise (UndefinedId id)
 
 
+and codegen_if (cond : expr) (t_stmt : statement) (f_stmt : statement) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  let cond_eval : Llvm.llvalue = codegen_expr llbuilder cond in
+  let start_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
+  let func : Llvm.llvalue = Llvm.block_parent start_bb in
+
+  let if_bb : Llvm.llbasicblock = Llvm.append_block context "if" func in
+  Llvm.position_at_end if_bb llbuilder;
+
+  let _ : Llvm.llvalue = codegen_stmt t_stmt llbuilder in
+  let new_if_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
+
+  let else_bb : Llvm.llbasicblock = Llvm.append_block context "else" func in
+  Llvm.position_at_end else_bb llbuilder;
+
+  let _ : Llvm.llvalue = codegen_stmt f_stmt llbuilder in
+  let new_else_bb : Llvm.llbasicblock = Llvm.insertion_block llbuilder in
+
+  let merge_bb : Llvm.llbasicblock = Llvm.append_block context "ifcont" func in
+  Llvm.position_at_end merge_bb llbuilder;
+
+  let else_bb_val : Llvm.llvalue = Llvm.value_of_block new_else_bb in
+  Llvm.position_at_end start_bb llbuilder;
+
+  ignore (Llvm.build_cond_br cond_eval if_bb else_bb llbuilder);
+  Llvm.position_at_end new_if_bb llbuilder; ignore (Llvm.build_br merge_bb llbuilder);
+  Llvm.position_at_end new_else_bb llbuilder; ignore (Llvm.build_br merge_bb llbuilder);
+  Llvm.position_at_end merge_bb llbuilder;
+  else_bb_val
+
 (*  *)
 and codegen_function_call = Llvm.const_int i32_t 0
+
+
+and codegen_return (expr : expr) (llbuilder : Llvm.llbuilder) : Llvm.llvalue =
+  match expr with
+  | Noexpr  -> Llvm.build_ret_void llbuilder
+  | _       -> Llvm.build_ret (codegen_expr llbuilder expr) llbuilder
 
 
 (* Function Call -> LLVM Function Lookup/Execution *)
@@ -189,7 +226,7 @@ and codegen_printf (params : expr list) (llbuilder : Llvm.llbuilder) =
   let format_llstr : Llvm.llvalue =
     match format_str with
     | StringLit str -> Llvm.build_global_stringptr str "fmt" llbuilder
-    | _             -> raise FirstPrintArgumentNotString in
+    | _             -> raise (FirstPrintArgumentNotString format_str) in
 
   let args : expr list = List.tl params in
   let format_llargs : Llvm.llvalue list = List.map (fun arg ->
@@ -249,7 +286,7 @@ let codegen_main (stmts : statement list) (d_type : datatype) : unit =
         else ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
       | Llvm.At_start _ -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder)
     end
-  | _ -> raise InvalidMainReturnType ;;
+  | _ -> raise (InvalidMainReturnType d_type) ;;
 
 
 (* Function Definition -> LLVM Function Store *)
