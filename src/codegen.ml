@@ -158,7 +158,7 @@ and codegen_assign ~(llbuilder : Llvm.llbuilder) (expr1 : expr) (expr2 : expr) :
 (* Variable definition -> LLVM Store Variable, Value *)
 and codegen_vardef ~(llbuilder : Llvm.llbuilder) (vname : string) (data_t : datatype) (expr : expr) : Llvm.llvalue =
   let expr_t : datatype = get_expr_type expr in
-  match data_t = expr_t with
+  match data_t = expr_t || expr_t = Unit_t with
   | true ->
     begin
       let lltype : Llvm.lltype = lltype_of_datatype data_t in
@@ -237,6 +237,11 @@ and codegen_for ~(llbuilder : Llvm.llbuilder) (init : expr) (cond : expr) (incr 
   Llvm.move_block_after incr_bb cond_bb;
   Llvm.move_block_after cond_bb after_bb;
   ignore (Llvm.build_br incr_bb llbuilder);
+
+  Llvm.position_at_end incr_bb llbuilder;
+
+  let _ = codegen_expr incr ~llbuilder in
+  ignore(Llvm.build_br cond_bb llbuilder);
 
   Llvm.position_at_end cond_bb llbuilder;
 

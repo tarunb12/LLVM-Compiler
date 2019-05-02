@@ -98,8 +98,8 @@ expr_list:
 
 expr:
     | atom                                      { $1 }
-    | expr INCREMENT                            { BinOp(Add, $1, IntLit(1)) }
-    | expr DECREMENT                            { BinOp(Sub, $1, IntLit(1)) }
+    | expr INCREMENT                            { Assign($1, BinOp(Add, $1, IntLit(1))) }
+    | expr DECREMENT                            { Assign($1, BinOp(Sub, $1, IntLit(1))) }
     | expr PLUS     expr                        { BinOp(Add, $1, $3) }
     | expr MINUS    expr                        { BinOp(Sub, $1, $3) }
     | expr MUL      expr                        { BinOp(Mult, $1, $3) }
