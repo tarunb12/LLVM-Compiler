@@ -315,7 +315,7 @@ and codegen_printf ~(llbuilder : Llvm.llbuilder) (params : expr list) : Llvm.llv
     let arg_t : datatype = datatype_of_lltype (Llvm.type_of arg_eval) in
     match arg_t with
     | Float_t -> Llvm.const_fpext arg_eval double_t
-    | _ -> arg_eval
+    | _       -> arg_eval
   ) args in
 
   let func_llvalue : Llvm.llvalue = llvm_lookup_function "printf" in
@@ -466,7 +466,9 @@ let codegen_ast (ast : program) : Llvm.llmodule =
         codegen_function d_type fname params stmts
       | _ -> ignore (codegen_stmt stmt ~llbuilder:builder)
     ) stmts in
-  the_module ;;
+  match !main_defined with
+  | true  -> the_module
+  | false -> raise MainMethodNotDefined ;;
 
 (* Delete Main (Entry) *)
 let delete_main () =
@@ -476,6 +478,4 @@ let delete_main () =
 
 (* Print Module (Code) -> %.ll *)
 let print_module (file : string) (m : Llvm.llmodule) : unit =
-  match !main_defined with
-  | true  -> Llvm.print_module file m
-  | false -> raise MainMethodNotDefined ;;
+  Llvm.print_module file m ;;
