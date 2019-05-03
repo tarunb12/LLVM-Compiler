@@ -53,6 +53,7 @@ let rec codegen_stmt ~(llbuilder : Llvm.llbuilder) : statement -> Llvm.llvalue =
   | Block stmt_list               -> begin try List.hd (List.map (fun stmt -> codegen_stmt stmt ~llbuilder) stmt_list) with Failure _ -> Llvm.const_null i1_t end
   | If (cond, t_stmt, f_stmt)     -> codegen_if cond t_stmt f_stmt ~llbuilder
   | For (init, cond, incr, stmt)  -> codegen_for init cond incr stmt ~llbuilder
+  | While (cond, stmt)            -> codegen_while cond stmt ~llbuilder
   | Expr expr                     -> codegen_expr expr ~llbuilder
   | VarDef (d_type, vname, e)     -> codegen_vardef vname d_type e ~llbuilder
   | Return expr                   -> codegen_return expr ~llbuilder
