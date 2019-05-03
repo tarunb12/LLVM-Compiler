@@ -1,12 +1,13 @@
-// if/else test
-
 int main() {
-    if (0 > 1) {
-        printf("%d > %d\n", 0, 1)
-        printf("(%s)", "if block")
-    } else if (1 < 2) {
-        printf("%d < %d\n", 1, 2)
-        printf("(%s)", "else if block")
+    int x = 5
+    bool b = x == 4
+    if (b) {
+        string string_of_bool = "true"
+        printf("x == %d: %s". 4, string_of_bool)
+    }
+    else {
+        string_of_bool = "false"
+        printf("x == %d: %s". 4, string_of_bool)
     }
     return 0
 }

@@ -322,6 +322,43 @@ and codegen_printf ~(llbuilder : Llvm.llbuilder) (params : expr list) : Llvm.llv
   let llargs : Llvm.llvalue array = Array.of_list (format_llstr :: format_llargs) in
   Llvm.build_call func_llvalue llargs "printf" llbuilder ;;
 
+let rec get_return_stmts (stmts : statement list) : statement list =
+  match stmts with
+  | [] -> []
+  | hd :: tl ->
+    match hd with
+    | Block stmts -> get_return_stmts stmts @ get_return_stmts tl
+    | If (_, t_stmt, f_stmt) -> get_return_stmts ([t_stmt]) @ get_return_stmts ([f_stmt]) @ get_return_stmts tl
+    | For (_, _, _, stmt) -> get_return_stmts ([stmt]) @ get_return_stmts tl
+    | While (_, stmt) -> get_return_stmts ([stmt]) @ get_return_stmts tl
+    | Return expr -> hd :: get_return_stmts tl
+    | _ -> get_return_stmts tl ;;
+
+let rec check_valid_return_type (d_type : datatype) (f_type : Llvm.lltype) (fname : string) : expr -> unit = function
+  | BinOp (_, e1, e2) -> check_valid_return_type d_type f_type fname e1; check_valid_return_type d_type f_type fname e2
+  | UnOp (_, e) -> check_valid_return_type d_type f_type fname e
+  | Call (f_name, _) as expr ->
+    begin
+      match fname = f_name with
+      | true  -> ()
+      | false ->
+        let return_t : datatype = datatype_of_lltype (Llvm.return_type (Llvm.type_of (llvm_lookup_function f_name))) in
+        match return_t = d_type with
+        | true  -> ()
+        | false -> raise (InvalidFunctionReturnType (fname, return_t, d_type, expr))
+    end
+  | Id _ | Assign _ | Noexpr as expr ->
+    begin
+      match datatype_of_lltype f_type = Unit_t with
+      | true  -> ()
+      | false -> raise (InvalidFunctionReturnType (fname, Unit_t, d_type, expr))
+    end
+  | _ as expr ->
+    let expr_t = get_expr_type expr in
+    match expr_t = datatype_of_lltype f_type with
+    | true  -> ()
+    | false -> raise (InvalidFunctionReturnType (fname, expr_t, d_type, expr)) ;;  
+
 (* Initialization of Function Parameters *)
 let init_params (f : Llvm.llvalue) (args : statement list) (fname : string) : unit =
   let args = Array.of_list args in
@@ -412,6 +449,7 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
       | true  -> ignore (Llvm.build_ret_void llbuilder)
       | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder) ;;
 
+(* Define Function -> LLVM Routine *)
 let codegen_function_def (d_type : datatype) (fname : string) (params : statement list) (stmts : statement list) : unit =
   match fname with
   | "main" -> main_defined := true
@@ -421,11 +459,25 @@ let codegen_function_def (d_type : datatype) (fname : string) (params : statemen
       | VarDef (d_type, _, Noexpr) -> lltype_of_datatype d_type :: expr
       | _ -> is_var_arg := true; expr
     ) [] params) in
-    let ftype : Llvm.lltype =
+    let f_type : Llvm.lltype =
       match !is_var_arg with
       | true  -> Llvm.var_arg_function_type (lltype_of_datatype d_type) (Array.of_list params)
       | false -> Llvm.function_type (lltype_of_datatype d_type) (Array.of_list params) in
-    ignore (Llvm.define_function fname ftype the_module) ;;
+    let return_stmts : statement list = get_return_stmts stmts in 
+    match return_stmts with
+    | [] ->
+      begin
+        match datatype_of_lltype f_type = Unit_t with
+        | true  -> ()
+        | false -> raise (InvalidFunctionWithoutReturn (fname, d_type))
+      end
+    | _ ->
+      List.iter (fun stmt ->
+        match stmt with
+        | Return expr -> check_valid_return_type d_type f_type fname expr
+        | _ -> ()
+      ) return_stmts;
+    ignore (Llvm.define_function fname f_type the_module) ;;
 
 (* Built In LLVM Functions *)
 let codegen_library_functions () =
@@ -458,7 +510,8 @@ let codegen_ast (ast : program) : Llvm.llmodule =
   (* Reserved functions in LLVM *)
   let () = codegen_library_functions () in
   (* Map statements to LLVM *)
-  let _ : unit list = match ast with Program stmts ->
+  let _ : unit list =
+    match ast with Program stmts ->
     List.map (fun stmt ->
       match stmt with
       | FuncDef (d_type, fname, params, stmts) ->
@@ -474,7 +527,7 @@ let codegen_ast (ast : program) : Llvm.llmodule =
 let delete_main () =
   try let main = llvm_lookup_function "main" in
     Llvm.delete_function main
-  with LLVMFunctionNotFound _ -> ();;
+  with LLVMFunctionNotFound _ -> () ;;
 
 (* Print Module (Code) -> %.ll *)
 let print_module (file : string) (m : Llvm.llmodule) : unit =

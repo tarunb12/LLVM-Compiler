@@ -1,14 +1,15 @@
-// Recursion test (fibonacci)
-
-int fibonacci(int c) {
-    if (c <= 1) return c
-    else return fibonacci(c - 1) + fibonacci(c - 2)
-}
+// multi loop & if/else test
 
 int main() {
     int i
-    for (i = 0; i < 13; i++) {
-        printf("fibonacci(%d) = %d\n", i, fibonacci(i))
+    int j
+    for (i = 0; i < 5; i++) {
+        for (j = 0; j < 5; j++) {
+            int k = 0
+            while (k < i * j) {
+                k++
+            }
+            printf("i = %d =>\n  j = %d =>\n    k = i * j = %2d\n\n", i, j, k)
+        }
     }
-    return 0
 }

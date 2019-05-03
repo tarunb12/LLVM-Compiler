@@ -35,6 +35,7 @@
 
 program:
     | stmts EOF                                 { Program($1) }
+    | EOF                                       { Program([]) }
     ;
 
 stmts:

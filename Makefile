@@ -1,6 +1,6 @@
 # Compile options (OCaml)
 OC=ocamlbuild
-OFLAGS=-use-menhir -use-ocamlfind -pkgs llvm
+OFLAGS=-use-menhir -use-ocamlfind -pkgs llvm -menhir "menhir --fixed-exception"
 
 # Compile options (LLVM)
 CC=clang

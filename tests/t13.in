@@ -1,0 +1,7 @@
+int func() {
+    return "invalid return type"
+}
+
+int main() {
+    printf(func())
+}

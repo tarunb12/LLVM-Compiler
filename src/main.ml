@@ -1,3 +1,4 @@
+open Utils ;;
 open Lexer ;;
 open Lexing ;;
 open Parser ;;

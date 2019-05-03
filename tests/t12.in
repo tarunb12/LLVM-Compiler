@@ -1,0 +1,19 @@
+// Recursion test (gcd)
+
+int gcd(int m, int n) {
+    if (n != 0) return gcd(n, m % n)
+    else return m
+}
+
+int main() {
+    string gcd_spec = "gcd(%d, %d) = %d\n"
+
+    printf(gcd_spec, -30, 45, gcd(-30, 45))
+    printf(gcd_spec, 8, 23, gcd(8, 23))
+    printf(gcd_spec, 36, 404, gcd(36, 404))
+    printf(gcd_spec, 83, 93, gcd(83, 93))
+    printf(gcd_spec, 203, -1102, gcd(203, -1102))
+    printf(gcd_spec, 163231, 135749, gcd(163231, 135749))
+    
+    return 0
+}

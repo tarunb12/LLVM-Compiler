@@ -1,13 +1,100 @@
-fibonacci(0) = 0
-fibonacci(1) = 1
-fibonacci(2) = 1
-fibonacci(3) = 2
-fibonacci(4) = 3
-fibonacci(5) = 5
-fibonacci(6) = 8
-fibonacci(7) = 13
-fibonacci(8) = 21
-fibonacci(9) = 34
-fibonacci(10) = 55
-fibonacci(11) = 89
-fibonacci(12) = 144
+i = 0 =>
+  j = 0 =>
+    k = i * j =  0
+
+i = 0 =>
+  j = 1 =>
+    k = i * j =  0
+
+i = 0 =>
+  j = 2 =>
+    k = i * j =  0
+
+i = 0 =>
+  j = 3 =>
+    k = i * j =  0
+
+i = 0 =>
+  j = 4 =>
+    k = i * j =  0
+
+i = 1 =>
+  j = 0 =>
+    k = i * j =  0
+
+i = 1 =>
+  j = 1 =>
+    k = i * j =  1
+
+i = 1 =>
+  j = 2 =>
+    k = i * j =  2
+
+i = 1 =>
+  j = 3 =>
+    k = i * j =  3
+
+i = 1 =>
+  j = 4 =>
+    k = i * j =  4
+
+i = 2 =>
+  j = 0 =>
+    k = i * j =  0
+
+i = 2 =>
+  j = 1 =>
+    k = i * j =  2
+
+i = 2 =>
+  j = 2 =>
+    k = i * j =  4
+
+i = 2 =>
+  j = 3 =>
+    k = i * j =  6
+
+i = 2 =>
+  j = 4 =>
+    k = i * j =  8
+
+i = 3 =>
+  j = 0 =>
+    k = i * j =  0
+
+i = 3 =>
+  j = 1 =>
+    k = i * j =  3
+
+i = 3 =>
+  j = 2 =>
+    k = i * j =  6
+
+i = 3 =>
+  j = 3 =>
+    k = i * j =  9
+
+i = 3 =>
+  j = 4 =>
+    k = i * j = 12
+
+i = 4 =>
+  j = 0 =>
+    k = i * j =  0
+
+i = 4 =>
+  j = 1 =>
+    k = i * j =  4
+
+i = 4 =>
+  j = 2 =>
+    k = i * j =  8
+
+i = 4 =>
+  j = 3 =>
+    k = i * j = 12
+
+i = 4 =>
+  j = 4 =>
+    k = i * j = 16
+
