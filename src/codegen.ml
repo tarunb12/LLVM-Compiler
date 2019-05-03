@@ -59,7 +59,7 @@ let rec codegen_stmt ~(llbuilder : Llvm.llbuilder) : statement -> Llvm.llvalue =
   | Return expr                   -> codegen_return expr ~llbuilder
   | Break                         -> codegen_break ~llbuilder
   | Continue                      -> codegen_continue ~llbuilder
-  | FuncDef _                     -> raise NotImplemented
+  | FuncDef (_, fname, _, _)      -> raise (NestedFunctionsNotSupported fname)
 
 (* Expression -> LLVM Expression Evaluation *)
 and codegen_expr ~(llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue = function
