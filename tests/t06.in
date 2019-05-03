@@ -1,12 +1,7 @@
-// if/else test
+// Undefined variable test
 
 int main() {
-    if (0 > 1) {
-        printf("%d > %d\n", 0, 1)
-        printf("(%s)", "if block")
-    } else if (1 < 2) {
-        printf("%d < %d\n", 1, 2)
-        printf("(%s)", "else if block")
-    }
+    a = 5
+    printf("a = %d", a)
     return 0
 }

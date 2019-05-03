@@ -1,11 +1,12 @@
-// break test
+// for loop test
 
 int main() {
-    int i = 6
-    int j = 0
-    while (j < i) {
-        if (j == 4) break
-        printf("%d %s\n", j++, "iteration (no breaks yet)")
+    int max = 5
+    int i
+    for (i = 0; i <= max; i++) {
+        if (i == 1) printf("%d step\n", i)
+        else if (i < max) printf("%d steps\n", i)
+        else printf ("%dth and final step", i)
     }
     return 0
 }

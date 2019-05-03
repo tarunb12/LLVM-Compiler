@@ -1,4 +1,9 @@
+// Invalid return type test
+
+int func() {
+    return "invalid return type"
+}
+
 int main() {
-    a = 5
-    return 0
+    printf(func())
 }

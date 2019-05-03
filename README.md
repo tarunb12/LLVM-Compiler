@@ -6,12 +6,11 @@ $ make
 $ make tests
 ```
 
-In order to run the tests, you must have clang installed.
+In order to run the tests, you must have clang installed to compile the llvm into a binary executable.
 
 Test inputs are read into the program, which produces its corresponding llvm file, compiled by clang into an executable, and running the executable produces the output file.
 
-The input files can be found directly in the tests folder, and the produced llvm, executable, and out files will be
-in the llvm, executables, and results folder respectively within tests.
+The input files can be found directly in the tests folder, and the produced llvm, executable, and out files will be in the llvm, executables, and results folder respectively within tests.
 
 ### Package Versions
 | Package           | Version  |
@@ -23,11 +22,9 @@ in the llvm, executables, and results folder respectively within tests.
 
 ## Language Features
 
-### Syntax/Structure
+This language is statically typed, ensuring all (return/function/variable) definitions are consistent with their type definitions throughout the program. If any errors are thrown, detailed error messages are printed in the output file rather than stopping the rest of the tests from executing.
 
-If there are any errors within the tests, I have for the most part checked for those errors, and custom error messages
-with more information on the error is output into the file, rather than producing a compiler error (so that the rest
-of the test are still able to be compiled). This is done by making a custom AST which simply calls `printf` with the error message (so it is still ran through LLVM).
+### Syntax/Structure
 
 Each file must have a main method as the entry point to the program (which LLVM requires). The main method should look as follows:
 
@@ -43,15 +40,12 @@ By default, main will return the 32-bit integer 0, so the return type is optiona
 
 In general, functions will be structured as follows:
 ```c
-type fname(arg1, arg2, ..., argn) {
+<type> fname(arg1, arg2, ..., argn) {
    ...
    return n
 }
 ```
-where type can be one of "int", "float", "bool", "char", or "string", and 'n' is of the same type. Booleans are
-encoded as 1-bit integers, characters as 8-bit integers, and Integers as 32-bit integers. Floats are 32-bit floating
-point types, and strings are 8-bit integer pointers. When performing binary operations on these types (excluding string), both expressions being operated on should have the same type, or an error will be thrown, even though many
-of these types are stored as integers. Floats cannot perform certain operations, such as and, or, and xor.
+where type can be one of "int", "float", "bool", "char", or "string", and 'n' is of the same type. Recursive functions are also supported. Booleans are encoded as 1-bit integers, characters as 8-bit integers, and Integers as 32-bit integers. Floats are 32-bit floating point types, and strings are 8-bit integer pointers. When performing binary operations on these types (excluding string), both expressions being operated on should have the same type, or an error will be thrown, even though many of these types are stored as integers. Floats cannot perform certain operations, such as and, or, and xor.
 
 Please note that for function calls to work, the function must be defined before the function call.
 
@@ -65,15 +59,11 @@ If statements are structured as follows:
 ```c
    if (cond_1) {
       ...
-   }
-   else if (cond_2) {
+   } else if (cond_2) {
       ...
-   }
-   ...
-   else if (cond_n) {
+   } ... else if (cond_n) {
 
-   }
-   else {
+   } else {
       ...
    }
 
@@ -85,8 +75,7 @@ If statements are structured as follows:
    else ...
 ```
 
-Conditions in the if statement must evaluate to a bool type. Else blocks are NOT required
-for each of the if statements.
+Conditions in the if statement must evaluate to a bool type. Else blocks are NOT required for each of the if statements.
 
 ### For Statement
 
@@ -111,5 +100,41 @@ while (cond) {
 }
 ```
 
-The condition must evaluate to a bool type. While statements are implemented as for loops, but with the first and third
-parts of the for loop as null (leaving only the condition).
+The condition must evaluate to a bool type. While statements are implemented as for loops, but with the first and third parts of the for loop as null (leaving only the condition).
+
+### Comments
+
+The format for single line comments is
+```c
+// ...
+```
+
+and multiline comments is
+```c
+/*
+   ...
+*/
+```
+
+### Supported Operations
+
+|                       | format | int | float  | bool   | char   | string |
+|-----------------------|:------:|:---:|:------:|:------:|:------:|:------:|
+| negate                | -a     | ✓   | ✓      |        | ✓      |        |
+| increment             | a++    | ✓   |        |        | ✓      |        |
+| decrement             | a--    | ✓   |        |        | ✓      |        |
+| plus                  | a + b  | ✓   | ✓      |        | ✓      |        |
+| minus                 | a - b  | ✓   | ✓      |        | ✓      |        |
+| multiply              | a * b  | ✓   | ✓      |        | ✓      |        |
+| divide                | a / b  | ✓   | ✓      |        | ✓      |        |
+| modulo                | a % b  | ✓   | ✓      |        | ✓      |        |
+| equality              | a == b | ✓   | ✓      |        | ✓      |        |
+| inequality            | a != b | ✓   | ✓      |        | ✓      |        |
+| less than             | a < b  | ✓   | ✓      |        | ✓      |        |
+| less than / equal     | a <= b | ✓   | ✓      |        | ✓      |        | 
+| greater than          | a > b  | ✓   | ✓      |        | ✓      |        |
+| greater than / equal  | a >= b | ✓   | ✓      |        | ✓      |        |  
+| not                   | !a     |     |        | ✓      |        |        |
+| and                   | a && b |     |        | ✓      |        |        |
+| or                    | a || b |     |        | ✓      |        |        |
+| xor                   | a ^ b  |     |        | ✓      |        |        |

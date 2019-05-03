@@ -1,12 +1,11 @@
-// continue test
+// break test
 
 int main() {
-    int i
-    for (i = 0; i < 30; i = i + 1) {
-        printf("i = %d -> i * 7 = %D\n", i, i * 7)
-        if (i < 24) continue
-        else break
-        printf("if ur reading this continue or break did not work")
+    int i = 6
+    int j = 0
+    while (j < i) {
+        if (j == 4) break
+        printf("%d %s\n", j++, "iteration (no breaks yet)")
     }
     return 0
 }
