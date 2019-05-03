@@ -1,4 +1,5 @@
 // multi loop & if/else test
+
 int main() {
     int i
     int j
@@ -8,7 +9,7 @@ int main() {
             while (k < i * j) {
                 k++
             }
-            printf("i = %d =>\n\tj = %d =>\n\t\tk = i * j = %2d\n\n", i, j, k)
+            printf("i = %d =>\n  j = %d =>\n    k = i * j = %2d\n\n", i, j, k)
         }
     }
 }

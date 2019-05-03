@@ -1,4 +1,5 @@
 // invalid main signature test
+
 bool main() {
     printf("%s", "bad return type for main (function signature)")
 }

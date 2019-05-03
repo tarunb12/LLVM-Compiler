@@ -1,10 +1,11 @@
 // break test
+
 int main() {
     int i = 6
     int j = 0
     while (j < i) {
         if (j == 4) break
-        printf("%d\n", j++)
+        printf("%d %s\n", j++, "iteration (no breaks yet)")
     }
     return 0
 }

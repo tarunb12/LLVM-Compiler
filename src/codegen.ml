@@ -17,6 +17,7 @@ let str_t       : Llvm.lltype     = Llvm.pointer_type (Llvm.i8_type context) ;;
 let break_block     : Llvm.llbasicblock ref = ref (Llvm.block_of_value (Llvm.const_int i32_t 0))
 let continue_block  : Llvm.llbasicblock ref = ref (Llvm.block_of_value (Llvm.const_int i32_t 0))
 let is_loop         : bool ref              = ref false ;;
+let main_defined    : bool ref              = ref false ;;
 
 let named_values      : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 let named_parameters  : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
@@ -58,7 +59,7 @@ let rec codegen_stmt ~(llbuilder : Llvm.llbuilder) : statement -> Llvm.llvalue =
   | Return expr                   -> codegen_return expr ~llbuilder
   | Break                         -> codegen_break ~llbuilder
   | Continue                      -> codegen_continue ~llbuilder
-  | _                             -> raise NotImplemented
+  | FuncDef _                     -> raise NotImplemented
 
 (* Expression -> LLVM Expression Evaluation *)
 and codegen_expr ~(llbuilder : Llvm.llbuilder) : expr -> Llvm.llvalue = function
@@ -299,6 +300,7 @@ and codegen_printf ~(llbuilder : Llvm.llbuilder) (params : expr list) : Llvm.llv
   let format_llstr : Llvm.llvalue =
     match format_str with
     | StringLit str -> Llvm.build_global_stringptr str "fmt" llbuilder
+    | Id id         -> codegen_id id ~llbuilder
     | _             -> raise (FirstPrintArgumentNotString format_str) in
 
   let args : expr list = List.tl params in
@@ -404,9 +406,9 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
       | true  -> ignore (Llvm.build_ret_void llbuilder)
       | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder) ;;
 
-let codegen_function_def (d_type : datatype) (fname : string) (params : statement list) : unit =
+let codegen_function_def (d_type : datatype) (fname : string) (params : statement list) (stmts : statement list) : unit =
   match fname with
-  | "main" -> ()
+  | "main" -> main_defined := true
   | _ ->
     let is_var_arg : bool ref = ref false in
     let params : Llvm.lltype list = List.rev (List.fold_left (fun expr -> function
@@ -453,7 +455,9 @@ let codegen_ast (ast : program) : Llvm.llmodule =
   let _ : unit list = match ast with Program stmts ->
     List.map (fun stmt ->
       match stmt with
-      | FuncDef (d_type, fname, params, stmts) -> codegen_function_def d_type fname params; codegen_function d_type fname params stmts
+      | FuncDef (d_type, fname, params, stmts) ->
+        codegen_function_def d_type fname params stmts;
+        codegen_function d_type fname params stmts
       | _ -> ignore (codegen_stmt stmt ~llbuilder:builder)
     ) stmts in
   the_module ;;
@@ -466,4 +470,6 @@ let delete_main () =
 
 (* Print Module (Code) -> %.ll *)
 let print_module (file : string) (m : Llvm.llmodule) : unit =
-  Llvm.print_module file m ;;
+  match !main_defined with
+  | true  -> Llvm.print_module file m
+  | false -> raise MainMethodNotDefined ;;

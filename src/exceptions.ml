@@ -16,6 +16,7 @@ exception FirstPrintArgumentNotString of expr
 exception FunctionWithoutBasicBlock of string
 exception LeftHandSideUnassignable of expr
 exception LLVMFunctionNotFound of string
+exception MainMethodNotDefined
 exception UndefinedId of string
 
 (* General exceptions *)

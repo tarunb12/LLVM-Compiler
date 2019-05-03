@@ -1,8 +1,9 @@
 // continue test
+
 int main() {
     int i
     for (i = 0; i < 30; i = i + 1) {
-        printf("i = %d => i * 7 = %D\n", i, i * 7)
+        printf("i = %d -> i * 7 = %D\n", i, i * 7)
         if (i < 24) continue
         else break
         printf("if ur reading this continue or break did not work")
