@@ -118,23 +118,23 @@ and multiline comments is
 
 ### Supported Operations
 
-|                       | format | int | float  | bool   | char   | string |
-|-----------------------|:------:|:---:|:------:|:------:|:------:|:------:|
-| negate                | -a     | ✓   | ✓      |        | ✓      |        |
-| increment             | a++    | ✓   |        |        | ✓      |        |
-| decrement             | a--    | ✓   |        |        | ✓      |        |
-| plus                  | a + b  | ✓   | ✓      |        | ✓      |        |
-| minus                 | a - b  | ✓   | ✓      |        | ✓      |        |
-| multiply              | a * b  | ✓   | ✓      |        | ✓      |        |
-| divide                | a / b  | ✓   | ✓      |        | ✓      |        |
-| modulo                | a % b  | ✓   | ✓      |        | ✓      |        |
-| equality              | a == b | ✓   | ✓      |        | ✓      |        |
-| inequality            | a != b | ✓   | ✓      |        | ✓      |        |
-| less than             | a < b  | ✓   | ✓      |        | ✓      |        |
-| less than / equal     | a <= b | ✓   | ✓      |        | ✓      |        | 
-| greater than          | a > b  | ✓   | ✓      |        | ✓      |        |
-| greater than / equal  | a >= b | ✓   | ✓      |        | ✓      |        |  
-| not                   | !a     |     |        | ✓      |        |        |
-| and                   | a && b |     |        | ✓      |        |        |
-| or                    | a || b |     |        | ✓      |        |        |
-| xor                   | a ^ b  |     |        | ✓      |        |        |
+|                       | format             | int | float  | bool   | char   | string |
+|-----------------------|:------------------:|:---:|:------:|:------:|:------:|:------:|
+| negate                | -a                 | ✓   | ✓      |        | ✓      |        |
+| increment             | a++                | ✓   |        |        | ✓      |        |
+| decrement             | a--                | ✓   |        |        | ✓      |        |
+| plus                  | a + b              | ✓   | ✓      |        | ✓      |        |
+| minus                 | a - b              | ✓   | ✓      |        | ✓      |        |
+| multiply              | a * b              | ✓   | ✓      |        | ✓      |        |
+| divide                | a / b              | ✓   | ✓      |        | ✓      |        |
+| modulo                | a % b              | ✓   | ✓      |        | ✓      |        |
+| equality              | a == b             | ✓   | ✓      |        | ✓      |        |
+| inequality            | a != b             | ✓   | ✓      |        | ✓      |        |
+| less than             | a < b              | ✓   | ✓      |        | ✓      |        |
+| less than / equal     | a <= b             | ✓   | ✓      |        | ✓      |        | 
+| greater than          | a > b              | ✓   | ✓      |        | ✓      |        |
+| greater than / equal  | a >= b             | ✓   | ✓      |        | ✓      |        |  
+| not                   | !a                 |     |        | ✓      |        |        |
+| and                   | a && b             |     |        | ✓      |        |        |
+| or                    | a &vert;&vert; b   |     |        | ✓      |        |        |
+| xor                   | a ^ b              |     |        | ✓      |        |        |
