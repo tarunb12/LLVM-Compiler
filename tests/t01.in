@@ -1,3 +1,4 @@
+// Syntax error test
 int main() {
     // hello world @@
     @@ look at this error

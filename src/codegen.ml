@@ -2,8 +2,6 @@ open Ast ;;
 open Program ;;
 open Exceptions ;;
 
-(* Combine strings: get raw string and combine in ocaml *)
-
 let filename    : string          = Sys.argv.(2) ;;
 let context     : Llvm.llcontext  = Llvm.global_context () ;;
 let the_module  : Llvm.llmodule   = Llvm.create_module context filename ;;
@@ -23,6 +21,7 @@ let is_loop         : bool ref              = ref false ;;
 let named_values      : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 let named_parameters  : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 50 ;;
 
+(* Used for datatype -> lltype, lltype -> datatype *)
 let types : (datatype * Llvm.lltype) list = [
   Int_t, i32_t;
   Float_t, float_t;
@@ -139,7 +138,7 @@ and handle_unop ~(llbuilder : Llvm.llbuilder) (op : unOp) (expr : expr) : Llvm.l
 
   type_handler expr_t
 
-(*  *)
+(* Expression Assignment -> LLVM Change Value *)
 and codegen_assign ~(llbuilder : Llvm.llbuilder) (expr1 : expr) (expr2 : expr) : Llvm.llvalue =
   let rhs : Llvm.llvalue = codegen_expr expr2 ~llbuilder in
   let lhs : Llvm.llvalue =
@@ -405,6 +404,22 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
       | true  -> ignore (Llvm.build_ret_void llbuilder)
       | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder) ;;
 
+let codegen_function_def (d_type : datatype) (fname : string) (params : statement list) : unit =
+  match fname with
+  | "main" -> ()
+  | _ ->
+    let is_var_arg : bool ref = ref false in
+    let params : Llvm.lltype list = List.rev (List.fold_left (fun expr -> function
+      | VarDef (d_type, _, Noexpr) -> lltype_of_datatype d_type :: expr
+      | _ -> is_var_arg := true; expr
+    ) [] params) in
+    let ftype : Llvm.lltype =
+      match !is_var_arg with
+      | true  -> Llvm.var_arg_function_type (lltype_of_datatype d_type) (Array.of_list params)
+      | false -> Llvm.function_type (lltype_of_datatype d_type) (Array.of_list params) in
+    ignore (Llvm.define_function fname ftype the_module) ;;
+
+(* Built In LLVM Functions *)
 let codegen_library_functions () =
   let printf_t  : Llvm.lltype   = Llvm.var_arg_function_type i32_t [| Llvm.pointer_type i8_t |] in
   let _         : Llvm.llvalue  = Llvm.declare_function "printf" printf_t the_module in
@@ -438,7 +453,7 @@ let codegen_ast (ast : program) : Llvm.llmodule =
   let _ : unit list = match ast with Program stmts ->
     List.map (fun stmt ->
       match stmt with
-      | FuncDef (d_type, fname, params, stmts) -> codegen_function d_type fname params stmts
+      | FuncDef (d_type, fname, params, stmts) -> codegen_function_def d_type fname params; codegen_function d_type fname params stmts
       | _ -> ignore (codegen_stmt stmt ~llbuilder:builder)
     ) stmts in
   the_module ;;

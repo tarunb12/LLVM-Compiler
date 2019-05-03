@@ -46,8 +46,8 @@ and string_of_expr : expr -> string = function
   | IntLit i -> string_of_int i
   | FloatLit f -> string_of_float f
   | BoolLit b -> string_of_bool b
-  | CharLit c -> Char.escaped c
-  | StringLit s -> "\"" ^ s ^ "\""
+  | CharLit c -> "'" ^ Char.escaped c ^ "'"
+  | StringLit s -> "\"" ^ String.escaped s ^ "\""
   | Id id -> id
   | BinOp (op, e1, e2) -> string_of_expr e1 ^ " " ^ string_of_binop op ^ " " ^ string_of_expr e2
   | UnOp (op, e) -> string_of_unop op ^ string_of_expr e

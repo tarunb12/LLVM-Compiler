@@ -1,0 +1,14 @@
+// multi loop & if/else test
+int main() {
+    int i
+    int j
+    for (i = 0; i < 5; i++) {
+        for (j = 0; j < 5; j++) {
+            int k = 0
+            while (k < i * j) {
+                k++
+            }
+            printf("i = %d =>\n\tj = %d =>\n\t\tk = i * j = %2d\n\n", i, j, k)
+        }
+    }
+}

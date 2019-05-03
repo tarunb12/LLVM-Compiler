@@ -1,0 +1,12 @@
+int fibonacci(int c) {
+    if (c <= 1) return c
+    else return fibonacci(c - 1) + fibonacci(c - 2)
+}
+
+int main() {
+    int i
+    for (i = 0; i < 13; i++) {
+        printf("fibonacci(%d) = %d\n", i, fibonacci(i))
+    }
+    return 0
+}
