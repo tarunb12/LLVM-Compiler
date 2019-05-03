@@ -300,8 +300,14 @@ and codegen_printf ~(llbuilder : Llvm.llbuilder) (params : expr list) : Llvm.llv
   let format_llstr : Llvm.llvalue =
     match format_str with
     | StringLit str -> Llvm.build_global_stringptr str "fmt" llbuilder
-    | Id id         -> codegen_id id ~llbuilder
-    | _             -> raise (FirstPrintArgumentNotString format_str) in
+    | Id id ->
+      begin
+        let value : Llvm.llvalue = codegen_id id ~llbuilder in
+        match datatype_of_lltype (Llvm.type_of value) with
+        | String_t  -> value
+        | _         -> raise (FirstPrintArgumentNotString format_str)
+      end
+    | _  -> raise (FirstPrintArgumentNotString format_str) in
 
   let args : expr list = List.tl params in
   let format_llargs : Llvm.llvalue list = List.map (fun arg ->
