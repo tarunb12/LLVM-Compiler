@@ -1,1 +1,1 @@
-Syntax error: File "tests/t04.in", line 7: ".".
+x == 4: false

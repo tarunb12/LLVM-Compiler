@@ -158,7 +158,8 @@ and codegen_assign ~(llbuilder : Llvm.llbuilder) (expr1 : expr) (expr2 : expr) :
 
 (* Variable definition -> LLVM Store Variable, Value *)
 and codegen_vardef ~(llbuilder : Llvm.llbuilder) (vname : string) (data_t : datatype) (expr : expr) : Llvm.llvalue =
-  let expr_t : datatype = get_expr_type expr in
+  let expr_val : Llvm.llvalue = codegen_expr expr ~llbuilder in
+  let expr_t : datatype = datatype_of_lltype (Llvm.type_of expr_val) in
   match data_t = expr_t || expr_t = Unit_t with
   | true ->
     begin

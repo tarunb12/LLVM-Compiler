@@ -38,8 +38,9 @@ let id = (alph | '_')(alph | digit | '_')* as lxm
 
 rule token = parse
   | ws                  { token lexbuf }
-  | '\n'                { next_line lexbuf; token lexbuf }
   | "//"                { single_comment lexbuf }
+  | "/*"                { multiline_comment lexbuf }
+  | '\n'                { next_line lexbuf; token lexbuf }
   | '('                 { LPAR }
   | ')'                 { RPAR }
   | '{'                 { LBRACE }
@@ -102,3 +103,7 @@ rule token = parse
 and single_comment = parse
   | '\n'                { token lexbuf }
   | _                   { single_comment lexbuf }
+
+and multiline_comment = parse
+  | "*/"                { token lexbuf }
+  | _                   { multiline_comment lexbuf }
