@@ -24,6 +24,8 @@ The input files can be found directly in the tests folder, and the produced llvm
 
 This language is statically typed, ensuring all (return/function/variable) definitions are consistent with their type definitions throughout the program. If any errors are thrown, detailed error messages are printed in the output file rather than stopping the rest of the tests from executing.
 
+Warning: Currently, functions of return type unit are not working
+
 ### Syntax/Structure
 
 Each file must have a main method as the entry point to the program (which LLVM requires). The main method should look as follows:
@@ -40,14 +42,14 @@ By default, main will return the 32-bit integer 0, so the return type is optiona
 
 In general, functions will be structured as follows:
 ```c
-<type> fname(arg1, arg2, ..., argn) {
+<type> fname(<type1> arg1, <type2> arg2, ..., <typen> argn) {
    ...
    return n
 }
 ```
 where type can be one of "int", "float", "bool", "char", or "string", and 'n' is of the same type. Recursive functions are also supported. Booleans are encoded as 1-bit integers, characters as 8-bit integers, and Integers as 32-bit integers. Floats are 32-bit floating point types, and strings are 8-bit integer pointers. When performing binary operations on these types (excluding string), both expressions being operated on should have the same type, or an error will be thrown, even though many of these types are stored as integers. Floats cannot perform certain operations, such as and, or, and xor.
 
-Please note that for function calls to work, the function must be defined before the function call.
+Functions can be called using the format `fname(arg1, arg2, ..., argn)`. Function calls do not require type specifiers like they do in the parameters of the function definition. Please note that for function calls to work, the function must be defined before the function call.
 
 Another thing to note is that parameters are kept constant, so if one of the parameters needs to be redifined, rather than doing it directly, define another variable equal to the parameter and manipulate that variable.
 
@@ -90,7 +92,7 @@ for (i = 0; cond; i++) {
 }
 ```
 
-The condition (second part of the for loop) must evaluate to a bool type.
+The condition (second part of the for loop) must evaluate to a bool type. In the first part of the for loop, if the variable for the index of the for loop needs to be initialized, it should be declared or defined before the for loop like in the example above, i.e. `for (int i = 0; ...; ...) { ... }` is considered invalid syntax.
 
 ### While Statement
 
@@ -122,23 +124,25 @@ and multiline comments is
 
 All operations performed are done through LLVM build instructions. The table below shows which operations are supported with which types. Any binary operations must have consistent input types.
 
-|                       | format             | int | float  | bool   | char   | string |
-|-----------------------|:------------------:|:---:|:------:|:------:|:------:|:------:|
-| negate                | -a                 | ✓   | ✓      |        | ✓      |        |
-| increment             | a++                | ✓   |        |        | ✓      |        |
-| decrement             | a--                | ✓   |        |        | ✓      |        |
-| plus                  | a + b              | ✓   | ✓      |        | ✓      |        |
-| minus                 | a - b              | ✓   | ✓      |        | ✓      |        |
-| multiply              | a * b              | ✓   | ✓      |        | ✓      |        |
-| divide                | a / b              | ✓   | ✓      |        | ✓      |        |
-| modulo                | a % b              | ✓   | ✓      |        | ✓      |        |
-| equality              | a == b             | ✓   | ✓      |        | ✓      |        |
-| inequality            | a != b             | ✓   | ✓      |        | ✓      |        |
-| less than             | a < b              | ✓   | ✓      |        | ✓      |        |
-| less than / equal     | a <= b             | ✓   | ✓      |        | ✓      |        | 
-| greater than          | a > b              | ✓   | ✓      |        | ✓      |        |
-| greater than / equal  | a >= b             | ✓   | ✓      |        | ✓      |        |  
-| not                   | !a                 |     |        | ✓      |        |        |
-| and                   | a && b             |     |        | ✓      |        |        |
-| or                    | a &vert;&vert; b   |     |        | ✓      |        |        |
-| xor                   | a ^ b              |     |        | ✓      |        |        |
+|                       | format             | int | float  | bool   | char   | string | unit   |
+|-----------------------|:------------------:|:---:|:------:|:------:|:------:|:------:|:------:|
+| negate                | -a                 | ✓   | ✓      |        | ✓      |        |        |
+| increment             | a++                | ✓   |        |        | ✓      |        |        |
+| decrement             | a--                | ✓   |        |        | ✓      |        |        |
+| plus                  | a + b              | ✓   | ✓      |        | ✓      |        |        |
+| minus                 | a - b              | ✓   | ✓      |        | ✓      |        |        |
+| multiply              | a * b              | ✓   | ✓      |        | ✓      |        |        |
+| divide                | a / b              | ✓   | ✓      |        | ✓      |        |        |
+| modulo                | a % b              | ✓   | ✓      |        | ✓      |        |        |
+| left shift            | a << b             | ✓   |        | ✓      | ✓      |        |        |
+| right shift           | a >> b             | ✓   |        | ✓      | ✓      |        |        |
+| equality              | a == b             | ✓   | ✓      | ✓      | ✓      |        |        |
+| inequality            | a != b             | ✓   | ✓      | ✓      | ✓      |        |        |
+| less than             | a < b              | ✓   | ✓      |        | ✓      |        |        |
+| less than / equal     | a <= b             | ✓   | ✓      |        | ✓      |        |        |
+| greater than          | a > b              | ✓   | ✓      |        | ✓      |        |        |
+| greater than / equal  | a >= b             | ✓   | ✓      |        | ✓      |        |        |
+| not                   | !a                 |     |        | ✓      |        |        |        |
+| and                   | a && b             |     |        | ✓      |        |        |        |
+| or                    | a &vert;&vert; b   |     |        | ✓      |        |        |        |
+| xor                   | a ^ b              |     |        | ✓      |        |        |        |

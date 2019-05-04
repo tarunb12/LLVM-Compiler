@@ -1,0 +1,25 @@
+// Shift multiplication
+
+int multiply(int p, int n) {
+    int result = 0
+    int count = 0
+    int q = n
+    while (q != 0) {
+        if (q % 2 == 1) result += (p << count)
+        count++
+        q /= 2
+    }
+    return result
+}
+
+int main() {
+    int p = 47
+    int q = 38
+    printf("%d * %d = %d\n", p, q, multiply(p, q))
+    p = 32
+    q = 87
+    printf("%d * %d = %d\n", p, q, multiply(p, q))
+    p = 2983
+    q = 2012
+    printf("%d * %d = %d\n", p, q, multiply(p, q))
+}

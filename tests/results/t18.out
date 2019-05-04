@@ -1,7 +1,8 @@
-Error: File "tests/t18.in": No entry point found in the file. Define the entry point with the function main defined as follows:
-
-int main() {
-	...
-	return 0
-}
-.
+Modular inverse of 1 (mod 37): 1
+Modular inverse of 2 (mod 37): 19
+Modular inverse of 3 (mod 37): 25
+Modular inverse of 4 (mod 37): 28
+Modular inverse of 5 (mod 37): 15
+Modular inverse of 6 (mod 37): 31
+Modular inverse of 7 (mod 37): 16
+Modular inverse of 8 (mod 37): 14

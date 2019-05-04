@@ -7,6 +7,7 @@
 %token PLUS MINUS MUL DIV ASSIGN NOT MOD XOR
 %token INCREMENT DECREMENT
 %token PLUSEQ MINUSEQ MULEQ DIVEQ
+%token LS RS
 %token EQ NEQ LT LTE GT GTE AND OR
 %token IF ELSE FOR WHILE BREAK CONTINUE RETURN
 %token TYPE_INT TYPE_FLOAT TYPE_BOOL TYPE_CHAR TYPE_STRING TYPE_UNIT
@@ -111,6 +112,8 @@ expr:
     | expr MUL      expr                        { BinOp(Mult, $1, $3) }
     | expr DIV      expr                        { BinOp(Div, $1, $3) }
     | expr MOD      expr                        { BinOp(Mod, $1, $3) }
+    | expr LS       expr                        { BinOp(LShift, $1, $3) }
+    | expr RS       expr                        { BinOp(RShift, $1, $3) }
     | expr EQ       expr                        { BinOp(Eq, $1, $3) }
     | expr NEQ      expr                        { BinOp(NEq, $1, $3) }
     | expr LT       expr                        { BinOp(Less, $1, $3) }

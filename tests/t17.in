@@ -1,5 +1,10 @@
 // Function test (combinations)
 
+int factorial(int n) {
+    if (n <= 1) return 1
+    return n * factorial(n - 1)
+}
+
 int choose(int n, int k) {
     if (k == 0 || k == n) {
         return 1
@@ -7,8 +12,13 @@ int choose(int n, int k) {
     return choose(n - 1, k - 1) + choose(n - 1, k)
 }
 
+int permute(int n, int k) {
+    return choose(n, k) * factorial(k)
+}
+
 int main() {
     int n = 16
     int k = 5
-    printf("C(%d, %d) = %d", n, k, choose(n, k))
+    printf("C(%d, %d) = %d\n", n, k, choose(n, k))
+    printf("P(%d, %d) = %d", n, k, permute(n, k))
 }

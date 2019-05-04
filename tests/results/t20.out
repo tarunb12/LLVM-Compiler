@@ -1,7 +1,3 @@
-Error: File "tests/t20.in": No entry point found in the file. Define the entry point with the function main defined as follows:
-
-int main() {
-	...
-	return 0
-}
-.
+47 * 38 = 1786
+32 * 87 = 2784
+2983 * 2012 = 6001796

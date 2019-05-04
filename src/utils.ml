@@ -7,6 +7,8 @@ let string_of_binop : binOp -> string = function
   | Mult    -> "*"
   | Div     -> "/"
   | Mod     -> "%"
+  | LShift  -> "<<"
+  | RShift  -> ">>"
   | And     -> "&&"
   | Or      -> "||"
   | Xor     -> "^"

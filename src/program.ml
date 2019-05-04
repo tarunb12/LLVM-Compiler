@@ -15,6 +15,12 @@ let binop_type_of_types (op : binOp) (e1_t : datatype) (e2_t : datatype) : datat
         | Int_t | Float_t | Char_t -> e1_t
         | _ -> raise invalid_binary_operation
       end
+    | LShift | RShift ->
+      begin
+        match e1_t with
+        | Int_t | Char_t | Bool_t -> e1_t
+        | _ -> raise invalid_binary_operation
+      end
     | And | Or | Xor ->
       begin
         match e1_t with

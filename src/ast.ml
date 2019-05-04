@@ -2,6 +2,7 @@ type binOp =
     | Add | Sub | Mult | Div | Mod
     | And | Or | Xor | Eq | NEq
     | Less | LEq | Greater | GEq  
+    | LShift | RShift
     ;;
 
 type unOp =

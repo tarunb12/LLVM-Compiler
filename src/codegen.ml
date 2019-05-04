@@ -88,6 +88,8 @@ and handle_binop ~(llbuilder : Llvm.llbuilder) (op : binOp) (e1 : expr) (e2 : ex
     | Mult    -> Llvm.build_mul expr1 expr2 "multmp" llbuilder
     | Div     -> Llvm.build_sdiv expr1 expr2 "divtmp" llbuilder
     | Mod     -> Llvm.build_srem expr1 expr2 "sremtmp" llbuilder
+    | LShift  -> Llvm.build_shl expr1 expr2 "shltmp" llbuilder
+    | RShift  -> Llvm.build_ashr expr1 expr2 "lshrtmp" llbuilder
     | And     -> Llvm.build_and expr1 expr2 "andtmp" llbuilder
     | Or      -> Llvm.build_or expr1 expr2 "ortmp" llbuilder
     | Xor     -> Llvm.build_xor expr1 expr2 "xortmp" llbuilder
@@ -282,12 +284,15 @@ and codegen_continue ~(llbuilder : Llvm.llbuilder) : Llvm.llvalue =
 
 (* Function Call -> LLVM Branch *)
 and codegen_function_call ~(llbuilder : Llvm.llbuilder) (fname : string) (params : expr list) =
-  let call_f (f : Llvm.llvalue) : Llvm.llvalue =
-    let params = List.map (codegen_expr ~llbuilder) params in
-    Llvm.build_call f (Array.of_list params) "tmp" llbuilder in
+  let params : Llvm.llvalue list = List.map (codegen_expr ~llbuilder) params in
+  let call_f (f : Llvm.llvalue) (f_type : Llvm.lltype) : Llvm.llvalue =
+    match f_type = void_t with
+    | true -> Llvm.build_call f (Array.of_list params) "" llbuilder
+    | _ -> Llvm.build_call f (Array.of_list params) "tmp" llbuilder in
 
-  let f = llvm_lookup_function fname in
-  call_f f
+  let f : Llvm.llvalue = llvm_lookup_function fname in
+  let f_type : Llvm.lltype = Llvm.function_type (Llvm.type_of f) (Array.of_list (List.map Llvm.type_of params)) in
+  call_f f f_type
 
 (* Function Call -> LLVM Function Lookup/Execution *)
 and codegen_call ~(llbuilder : Llvm.llbuilder) (fname : string) (params : expr list) : Llvm.llvalue =
@@ -338,22 +343,7 @@ let rec get_return_stmts (stmts : statement list) : statement list =
 let rec check_valid_return_type (d_type : datatype) (return_t : Llvm.lltype) (fname : string) (f_type : Llvm.lltype) : expr -> unit = function
   | BinOp (_, e1, e2) -> check_valid_return_type d_type return_t fname f_type e1; check_valid_return_type d_type return_t fname f_type e2
   | UnOp (_, e) -> check_valid_return_type d_type return_t fname f_type e
-  | Call (f_name, _) as expr ->
-    begin
-      match fname = f_name with
-      | true  -> ()
-      | false ->
-        let return_t : datatype = datatype_of_lltype (Llvm.return_type (Llvm.type_of (llvm_lookup_function f_name))) in
-        match return_t = d_type with
-        | true  -> ()
-        | false -> raise (InvalidFunctionReturnType (fname, return_t, d_type, expr))
-    end
-  (* | Id _ as expr ->
-    begin
-      match datatype_of_lltype f_type = Unit_t with
-      | true  -> ()
-      | false -> raise (InvalidFunctionReturnType (fname, Unit_t, d_type, expr))
-    end *)
+  | Call _ -> ()
   | Id _ | Assign _ | Noexpr as expr ->
     begin
       match datatype_of_lltype f_type = Unit_t with
@@ -543,7 +533,7 @@ let codegen_ast (ast : program) : Llvm.llmodule =
           codegen_function d_type fname params stmts
         | _ -> ignore (codegen_stmt stmt ~llbuilder:builder)
       ) stmts
-      with e -> Printf.printf "test"; delete_functions the_module (); raise e in
+      with e -> delete_functions the_module (); raise e in
   match !main_defined with
   | true  -> the_module
   | false -> raise MainMethodNotDefined ;;

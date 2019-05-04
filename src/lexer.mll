@@ -56,6 +56,8 @@ rule token = parse
   | "-="                { MINUSEQ }
   | "*="                { MULEQ }
   | "/="                { DIVEQ }
+  | "<<"                { LS }
+  | ">>"                { RS }
   | '+'                 { PLUS }
   | '-'                 { MINUS }
   | '*'                 { MUL }
@@ -90,6 +92,10 @@ rule token = parse
   | "char"              { TYPE_CHAR }
   | "string"            { TYPE_STRING }
   | "unit"              { TYPE_UNIT }
+
+  (* Constants *)
+  | "PI"                { FLOAT(4. *. (atan 1.)) }
+  | "E"                 { FLOAT(exp 1.) }
 
   (* Atoms *)
   | int                 { INT (int_of_string lxm) }
