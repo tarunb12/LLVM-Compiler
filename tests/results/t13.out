@@ -1,1 +1,13 @@
-Error: File "tests/t13.in": Invalid return type specified in the function gcd: "unit", expected "int" in "return m".
+fibonacci(0) = 0
+fibonacci(1) = 1
+fibonacci(2) = 1
+fibonacci(3) = 2
+fibonacci(4) = 3
+fibonacci(5) = 5
+fibonacci(6) = 8
+fibonacci(7) = 13
+fibonacci(8) = 21
+fibonacci(9) = 34
+fibonacci(10) = 55
+fibonacci(11) = 89
+fibonacci(12) = 144

@@ -1,15 +1,12 @@
-// multi loop & if/else test
+// continue test
 
 int main() {
     int i
-    int j
-    for (i = 0; i < 5; i++) {
-        for (j = 0; j < 5; j++) {
-            int k = 0
-            while (k < i * j) {
-                k++
-            }
-            printf("i = %d =>\n  j = %d =>\n    k = i * j = %2d\n\n", i, j, k)
-        }
+    for (i = 0; i < 30; i = i + 1) {
+        printf("i = %d -> i * 7 = %D\n", i, i * 7)
+        if (i < 24) continue
+        else break
+        printf("if ur reading this continue or break did not work")
     }
+    return 0
 }

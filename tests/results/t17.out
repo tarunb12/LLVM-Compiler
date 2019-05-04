@@ -1,7 +1,1 @@
-Error: File "tests/t17.in": No entry point found in the file. Define the entry point with the function main defined as follows:
-
-int main() {
-	...
-	return 0
-}
-.
+C(16, 5) = 4368

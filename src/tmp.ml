@@ -457,6 +457,7 @@ let codegen_function (d_type : datatype) (fname : string) (params : statement li
         match return_t = void_t with
         | true  -> ignore (Llvm.build_ret_void llbuilder)
         | false -> ignore (Llvm.build_ret (Llvm.const_int i32_t 0) llbuilder);
+      Llvm_analysis.assert_valid_function f
     with e -> Llvm.delete_function f; raise e;;
 
 (* Define Function -> LLVM Routine *)

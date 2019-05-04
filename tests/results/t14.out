@@ -1,1 +1,6 @@
-Error: File "tests/t14.in": Invalid return type specified in the function func: "string", expected "int" in "return "invalid return type"".
+gcd(-30, 45) = 15
+gcd(8, 23) = 1
+gcd(36, 404) = 4
+gcd(83, 93) = 1
+gcd(203, -1102) = 29
+gcd(163231, 135749) = 151

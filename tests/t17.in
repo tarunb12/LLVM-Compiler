@@ -1,0 +1,14 @@
+// Function test (combinations)
+
+int choose(int n, int k) {
+    if (k == 0 || k == n) {
+        return 1
+    }
+    return choose(n - 1, k - 1) + choose(n - 1, k)
+}
+
+int main() {
+    int n = 16
+    int k = 5
+    printf("C(%d, %d) = %d", n, k, choose(n, k))
+}

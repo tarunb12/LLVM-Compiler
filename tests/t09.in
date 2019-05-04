@@ -1,11 +1,19 @@
-// break test
+// For loop test (sum of four squares)
 
 int main() {
-    int i = 6
-    int j = 0
-    while (j < i) {
-        if (j == 4) break
-        printf("%d %s\n", j++, "iteration (no breaks yet)")
+    int n = 743
+    int i
+    int j
+    int k
+    int l
+    for (i = 0; i * i <= n; i++) {
+        for (j = i; j * j <= n; j++) {
+            for (k = j; k * k <= n; k++) {
+                for (l = k; l <= n; l++) {
+                    if (i * i + j * j + k * k + l * l == n) printf("%d^2 + %d^2 + %d^2 + %d^2 = %d\n", i, j, k, l, n)
+                }
+            }
+        }
     }
     return 0
 }

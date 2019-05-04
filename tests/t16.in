@@ -1,0 +1,25 @@
+// Function test (prime factorization)
+
+int primeFactors(int k) {
+    int n = k
+    while (n % 2 == 0) {
+        printf ("%d ", 2)
+        n = n / 2
+    }
+    int i
+    for (i = 3; i < n / 2; i += 2) {
+        while (n % i == 0) {
+            printf("%d ", i)
+            n = n / i
+        }
+    }
+    if (n > 2) printf("%d ", n)
+    return 0
+}
+
+int main() {
+    int n = 436
+    printf("Prime factors of %d: ", n)
+    primeFactors(n)
+    return 0
+}
