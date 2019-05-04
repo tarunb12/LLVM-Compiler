@@ -14,10 +14,12 @@ exception InvalidParameterType of string
 exception InvalidUnaryOperation of unOp * datatype
 
 (* Code generation exceptions *)
+exception CannotRedefineParameter of string
 exception FirstPrintArgumentNotString of expr
 exception FunctionWithoutBasicBlock of string
 exception LeftHandSideUnassignable of expr
 exception LLVMFunctionNotFound of string
 exception MainMethodNotDefined
+exception MultipleEntryPoints
 exception NestedFunctionsNotSupported of string
 exception UndefinedId of string

@@ -20,4 +20,4 @@ let () = try open_in filename
   |> program token
   |> codegen_ast
   |> print_module out_file
-  with exn -> delete_main (); produce_error exn ;;
+  with exn -> produce_error exn ;;

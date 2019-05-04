@@ -6,6 +6,7 @@
 %token LPAR RPAR LBRACE RBRACE COMMA SEMI
 %token PLUS MINUS MUL DIV ASSIGN NOT MOD XOR
 %token INCREMENT DECREMENT
+%token PLUSEQ MINUSEQ MULEQ DIVEQ
 %token EQ NEQ LT LTE GT GTE AND OR
 %token IF ELSE FOR WHILE BREAK CONTINUE RETURN
 %token TYPE_INT TYPE_FLOAT TYPE_BOOL TYPE_CHAR TYPE_STRING TYPE_UNIT
@@ -27,6 +28,7 @@
 %left PLUS MINUS
 %left MUL DIV MOD
 %right NOT NEG
+%left PLUSEQ MINUSEQ MULEQ DIVEQ
 %left INCREMENT DECREMENT
 
 %type <Ast.program> program
@@ -100,6 +102,10 @@ expr:
     | atom                                      { $1 }
     | expr INCREMENT                            { Assign($1, BinOp(Add, $1, IntLit(1))) }
     | expr DECREMENT                            { Assign($1, BinOp(Sub, $1, IntLit(1))) }
+    | expr PLUSEQ   expr                        { Assign($1, BinOp(Add, $1, $3)) }
+    | expr MINUSEQ  expr                        { Assign($1, BinOp(Sub, $1, $3)) }
+    | expr MULEQ    expr                        { Assign($1, BinOp(Mult, $1, $3)) }
+    | expr DIVEQ    expr                        { Assign($1, BinOp(Div, $1, $3)) }
     | expr PLUS     expr                        { BinOp(Add, $1, $3) }
     | expr MINUS    expr                        { BinOp(Sub, $1, $3) }
     | expr MUL      expr                        { BinOp(Mult, $1, $3) }

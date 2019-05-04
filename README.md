@@ -49,6 +49,8 @@ where type can be one of "int", "float", "bool", "char", or "string", and 'n' is
 
 Please note that for function calls to work, the function must be defined before the function call.
 
+Another thing to note is that parameters are kept constant, so if one of the parameters needs to be redifined, rather than doing it directly, define another variable equal to the parameter and manipulate that variable.
+
 To print values, the printf function is built into this language, and is very similar to that of c. For example,  
 `printf("%d + %d = %d", 1, 2, 1 + 2)` will produce `1 + 2 = 3` in the output file. Expressions are NOT automatically printed when they are evaluated, so expressions will need to go through the printf call to be shown in the output file.
 
@@ -117,6 +119,8 @@ and multiline comments is
 ```
 
 ### Supported Operations
+
+All operations performed are done through LLVM build instructions. The table below shows which operations are supported with which types. Any binary operations must have consistent input types.
 
 |                       | format             | int | float  | bool   | char   | string |
 |-----------------------|:------------------:|:---:|:------:|:------:|:------:|:------:|

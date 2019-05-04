@@ -52,6 +52,10 @@ rule token = parse
   (* Math Operators *)
   | "++"                { INCREMENT }
   | "--"                { DECREMENT }
+  | "+="                { PLUSEQ }
+  | "-="                { MINUSEQ }
+  | "*="                { MULEQ }
+  | "/="                { DIVEQ }
   | '+'                 { PLUS }
   | '-'                 { MINUS }
   | '*'                 { MUL }

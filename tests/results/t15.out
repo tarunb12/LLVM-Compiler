@@ -1,7 +1,1 @@
-Error: File "tests/t15.in": No entry point found in the file. Define the entry point with the function main defined as follows:
-
-int main() {
-	...
-	return 0
-}
-.
+Error: File "tests/t15.in": Cannot redefine the parameter "n".

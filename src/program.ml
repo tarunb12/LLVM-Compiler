@@ -32,7 +32,7 @@ let binop_type_of_types (op : binOp) (e1_t : datatype) (e2_t : datatype) : datat
         match e1_t with
         | Unit_t | String_t -> raise invalid_binary_operation
         | _ -> e1_t
-      end
+      end ;;
 
 (* Get expression type *)
 let rec get_expr_type : expr -> datatype = function

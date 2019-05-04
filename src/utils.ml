@@ -68,6 +68,7 @@ let string_of_exception (filename : string) : exn -> string = function
   | exn ->
     "Error: File \"" ^ filename ^ "\": " ^
     match exn with
+    | CannotRedefineParameter id -> "Cannot redefine the parameter \"" ^ id ^ "\""
     | FirstPrintArgumentNotString expr -> "Invalid first argument for printf: " ^ string_of_expr expr
     | FunctionWithoutBasicBlock fname -> "The function \"" ^ fname ^ "\" is empty"
     | InvalidBinaryOperation (op, e1_t, e2_t) -> "Cannot perform the operation \"" ^ string_of_binop op ^ "\" on type " ^ string_of_datatype e1_t ^ " -> " ^ string_of_datatype e2_t
@@ -81,6 +82,7 @@ let string_of_exception (filename : string) : exn -> string = function
     | LeftHandSideUnassignable expr -> "Cannot assign a value to the left hand side of the expression: " ^ string_of_expr expr
     | LLVMFunctionNotFound fname -> "Could not find any function with the name \"" ^ fname ^ "\""
     | MainMethodNotDefined -> "No entry point found in the file. Define the entry point with the function main defined as follows:\n\nint main() {\n\t...\n\treturn 0\n}\n"
+    | MultipleEntryPoints -> "Cannot have multiple entry points within the file"
     | NestedFunctionsNotSupported fname -> "Nested functions are not supported (found the nested function " ^ fname
     | UndefinedId id -> "\"" ^ id ^ "\" is not defined"
     | Parsing.Parse_error -> "Could not parse the provided input file"
